@@ -11,6 +11,7 @@ execute:
 ---
 
 ## Instrucciones
+* Modificad dentro del documento .qmd vuestros datos personales (nombre y DNI) que se encuentran en el encabezado del archivo.
 
 * Aseguraos de que el archivo .qmd se renderice correctamente ANTES de continuar editando el documento y que el archivo .html correspondiente se genere en tu carpeta local en el ordenador.
 
