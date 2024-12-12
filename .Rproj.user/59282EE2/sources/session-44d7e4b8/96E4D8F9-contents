@@ -34,7 +34,6 @@ library(tidyverse)
 library(glue)
 library(lubridate)
 library(forcats)
-a<-a
 
 ```
 
