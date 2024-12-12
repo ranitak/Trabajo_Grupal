@@ -1,2 +1,2 @@
-# Trabajo_Grupal
+# Trabajo Grupal
 Estoy emocionado por empezar
