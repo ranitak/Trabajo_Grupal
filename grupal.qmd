@@ -31,6 +31,10 @@ execute:
 ```{r}
 rm(list = ls())
 library(tidyverse)
+library(glue)
+library(lubridate)
+library(forcats)
+
 ```
 
 ---
