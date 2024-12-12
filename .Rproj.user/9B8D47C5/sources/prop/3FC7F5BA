@@ -3,5 +3,13 @@
     "Source": "Source",
     "cursorPosition": "14,145",
     "scrollLine": "3",
+<<<<<<< Updated upstream
     "rmdVisualModeLocation": "1077:529.3333129882812"
+=======
+    "rmdVisualMode": "true",
+    "rmdVisualWrapConfigured": "true",
+    "docOutlineVisible": "1",
+    "rmdVisualCollapsedChunks": "",
+    "rmdVisualModeLocation": "1060:547.3333129882812"
+>>>>>>> Stashed changes
 }
