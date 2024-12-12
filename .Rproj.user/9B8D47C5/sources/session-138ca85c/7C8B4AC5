@@ -3,7 +3,7 @@
     "path": "~/GitHub/Trabajo_Grupal/grupal.qmd",
     "project_path": "grupal.qmd",
     "type": "quarto_markdown",
-    "hash": "3919656661",
+    "hash": "0",
     "contents": "",
     "dirty": false,
     "created": 1734001266014.0,
@@ -12,15 +12,16 @@
     "properties": {
         "source_window_id": "",
         "Source": "Source",
-        "cursorPosition": "13,0",
-        "scrollLine": "0"
+        "cursorPosition": "14,145",
+        "scrollLine": "3",
+        "rmdVisualModeLocation": "1077:529.3333129882812"
     },
     "folds": "",
-    "lastKnownWriteTime": 1734001467,
+    "lastKnownWriteTime": 1734002059,
     "encoding": "UTF-8",
     "collab_server": "",
     "source_window": "",
-    "last_content_update": 1734001467090,
+    "last_content_update": 1734002059,
     "read_only": false,
     "read_only_alternatives": []
 }
