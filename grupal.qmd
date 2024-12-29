@@ -211,7 +211,14 @@ Recuerda que el objetivo real es demostrar un dominio de las herramientas vistas
 
 Deberéis tenerlo todo subido a Github con el enlace generado de manera correcta.
 
+(election_tidy\$anno)
+
 ```{r}
+
+election_tidy <- election_data |> 
+  pivot_longer(cols = -c(tipo_eleccion:votos_candidaturas), names_to = "Partido", values_to = "votos") 
+
+
 
 
 ```
