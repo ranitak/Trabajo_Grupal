@@ -214,11 +214,47 @@ Deberéis tenerlo todo subido a Github con el enlace generado de manera correcta
 (election_tidy\$anno)
 
 ```{r}
-
+# Pasamos la tabla de elecciones a tidy, hacemos una columna partido
 election_tidy <- election_data |> 
-  pivot_longer(cols = -c(tipo_eleccion:votos_candidaturas), names_to = "Partido", values_to = "votos") 
+  pivot_longer(cols = -c(tipo_eleccion:votos_candidaturas), names_to = "Partido", values_to = "votos") |> drop_na("votos")
 
 
 
+# Hacemos que si un partido tienen asiganda varias abreviaturas se quede con la primera
+siglas_unique <- abbrev |> 
+  distinct(denominacion, .keep_all = TRUE)
 
+
+# UNimos elecciones con abreaviaturas, para que en elecciones salga la abrevaitura de cada partido
+election_tidy_with_siglas <- election_tidy |> 
+  left_join(siglas_unique, 
+            by = c("Partido" = "denominacion"))
+
+
+# Separamos cod_mun en las 3 varibales de comunidad autonoma, provincia y municipio, para que coincidan con las de la tabla elecciones
+cod_mun <- cod_mun |> 
+  separate(cod_mun, 
+           into = c("codigo_ccaa", "codigo_provincia", "codigo_municipio"), 
+           sep = "-")
+# En la tabla surveys (encuestas) hacemos una columna partido, muy simliar al primero de elecciones, además quitamos los partidos que no tienen importancia en la encuesta, es decir q ue no han recibido datos
+surveys_tidy <- surveys |> 
+  pivot_longer(cols = -c(type_survey:turnout), names_to = "Partido", values_to = "value") |> drop_na("value")
+
+# Agrupar varios partidos a la misma sigla
+
+abbrev_g<-abbrev |> 
+  mutate(siglas=case_when(
+    str_detect(denominacion, "SOCIALISTA") ~ "PSOE",
+    str_detect(denominacion, "CIUDADANOS") ~ "C's",
+    str_detect(denominacion, "PARTIDO NACIONALISTA VASCO") ~ "PNV",
+    str_detect(denominacion, "BLOQUE NACIONALISTA GALEGO") ~ "BNG",
+    str_detect(denominacion, "CONVERGENCIA i UNIO|CONVERGENCIA I UNIO") ~ "CIU",
+    str_detect(denominacion, "UNIDAS PODEMOS|IU|Podem|Ezker Batua") ~ "UP",
+    str_detect(denominacion, "
+ESQUERRA REPUBLICANA DE CATALUNYA") ~ "ESQR",
+    str_detect(denominacion, "SORTU|EUSKO|ALkARTASUNA|ARALAR|ALTERNATIBA") ~ "EH-BILDU",
+    str_detect(denominacion, "MÁS PAÍS") ~ "MP",
+    str_detect(denominacion, "VOX") ~ "VOX",
+    TRUE ~ "Otros",
+  ))
 ```
