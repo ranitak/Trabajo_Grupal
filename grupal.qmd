@@ -30,6 +30,14 @@ execute:
 
 > Insertad aquí todos los paquetes vayáis necesitando
 
+library(tidyverse)
+
+library(glue)
+
+library(lubridate)
+
+library(forcats)
+
 ```{r}
 rm(list = ls())
 library(tidyverse)
@@ -220,10 +228,29 @@ election_tidy <- election_data |>
 
 
 
-# Hacemos que si un partido tienen asiganda varias abreviaturas se quede con la primera
-siglas_unique <- abbrev |> 
-  distinct(denominacion, .keep_all = TRUE)
 
+
+# Agrupar varios partidos a la misma sigla
+abbrev_g<-abbrev |> 
+  mutate(siglas=case_when(
+    str_detect(denominacion, "PARTIDO SOCIALISTA|PSOE") ~ "PSOE",
+    str_detect(denominacion, "PARTIDO POPULAR") ~ "PP",
+    str_detect(denominacion, "CIUDADANOS-PARTIDO DE LA CIUDADANÍA|CIUDADANOS-PARTIDO DE LA CIUDADANIA") ~ "C's",
+    str_detect(denominacion, "PARTIDO NACIONALISTA VASCO") ~ "PNV",
+    str_detect(denominacion, "BLOQUE NACIONALISTA GALEGO") ~ "BNG",
+    str_detect(denominacion, "CONVERGENCIA i UNIO|CONVERGENCIA I UNIO") ~ "CIU",
+    str_detect(denominacion, "UNIDAS PODEMOS|PODEM|EZKER BATUA|IZQUIERDA UNIDA") ~ "UP",
+    str_detect(denominacion, "ESQUERRA REPUBLICANA DE CATALUNYA") ~ "ERC",
+    str_detect(denominacion, "SORTU|EUSKO|ALkARTASUNA|ARALAR|ALTERNATIBA") ~ "EH-BILDU",
+    str_detect(denominacion, "MÁS PAÍS") ~ "MP",
+    str_detect(denominacion, "VOX") ~ "VOX",
+    TRUE ~ "OTROS",
+  ))
+
+
+# Hacemos que si un partido tienen asiganda varias abreviaturas se quede con la primera
+siglas_unique <- abbrev_g |> 
+  distinct(denominacion, .keep_all = TRUE)
 
 # UNimos elecciones con abreaviaturas, para que en elecciones salga la abrevaitura de cada partido
 election_tidy_with_siglas <- election_tidy |> 
@@ -236,25 +263,218 @@ cod_mun <- cod_mun |>
   separate(cod_mun, 
            into = c("codigo_ccaa", "codigo_provincia", "codigo_municipio"), 
            sep = "-")
+
+
 # En la tabla surveys (encuestas) hacemos una columna partido, muy simliar al primero de elecciones, además quitamos los partidos que no tienen importancia en la encuesta, es decir q ue no han recibido datos
 surveys_tidy <- surveys |> 
   pivot_longer(cols = -c(type_survey:turnout), names_to = "Partido", values_to = "value") |> drop_na("value")
 
-# Agrupar varios partidos a la misma sigla
 
-abbrev_g<-abbrev |> 
-  mutate(siglas=case_when(
-    str_detect(denominacion, "SOCIALISTA") ~ "PSOE",
-    str_detect(denominacion, "CIUDADANOS") ~ "C's",
-    str_detect(denominacion, "PARTIDO NACIONALISTA VASCO") ~ "PNV",
-    str_detect(denominacion, "BLOQUE NACIONALISTA GALEGO") ~ "BNG",
-    str_detect(denominacion, "CONVERGENCIA i UNIO|CONVERGENCIA I UNIO") ~ "CIU",
-    str_detect(denominacion, "UNIDAS PODEMOS|IU|Podem|Ezker Batua") ~ "UP",
-    str_detect(denominacion, "
-ESQUERRA REPUBLICANA DE CATALUNYA") ~ "ESQR",
-    str_detect(denominacion, "SORTU|EUSKO|ALkARTASUNA|ARALAR|ALTERNATIBA") ~ "EH-BILDU",
-    str_detect(denominacion, "MÁS PAÍS") ~ "MP",
-    str_detect(denominacion, "VOX") ~ "VOX",
-    TRUE ~ "Otros",
+
+# Debes descartar las encuestas que:
+# se refieran a elecciones anteriores a 2008
+# sean a pie de urna
+# tamaño muestral desconocido o inferior a 500.
+# tenga 1 día o menos de trabajo de campo.
+
+
+# Convertir las columnas de fecha a formato Date
+surveys_clean <- surveys_tidy |> 
+  mutate(
+    date_elec = ymd(date_elec),
+    field_date_from = ymd(field_date_from),
+    field_date_to = ymd(field_date_to),
+    field_duration = as.numeric(field_date_to - field_date_from)
+  )
+
+# Filtrar la base de datos según las condiciones
+surveys_clean <- surveys_clean |> 
+  filter(
+    date_elec >= "2008-01-01",         
+    exit_poll == FALSE,                
+    !is.na(size) & size >= 500,        
+    field_duration > 1                 
+  )
+
+
+
+# 12:
+# a) ¿Qué partido fue el ganador en los municipios con más de 100.000 habitantes (censo) en cada una de las elecciones?
+
+
+resultados_grandes_municipios <- election_tidy_with_siglas |> 
+  filter(censo > 100000) |> 
+  group_by(anno, Partido) |> 
+  summarise(
+    total_votos = sum(votos, na.rm = TRUE),
+    .groups = "drop"  
+  ) |> 
+  group_by(anno) |> 
+  slice_max(order_by = total_votos, n = 1) |> 
+  ungroup()  
+
+# b) ¿Qué partido fue el segundo cuando el primero fue el PSOE? ¿Y cuando el primero fue el PP?
+
+# Obtener los dos primeros partidos por año
+resultados_top2 <- election_tidy_with_siglas |> 
+  filter(censo > 100000) |> 
+  group_by(anno, Partido) |> 
+  summarise(
+    total_votos = sum(votos, na.rm = TRUE),
+    .groups = "drop"
+  ) |> 
+  group_by(anno) |> 
+  slice_max(order_by = total_votos, n = 2) |> 
+  arrange(anno, desc(total_votos)) |> 
+  mutate(posicion = row_number()) |> 
+  pivot_wider(
+    names_from = posicion,
+    values_from = c(Partido, total_votos)
+  )
+
+
+
+
+crecimiento_partido <- function(election_tidy) {
+  # Calcular los votos totales por partido y año
+  votos_agrupados <- election_tidy |> 
+    group_by(anno, Partido) |> 
+    summarise(total_votos = sum(votos, na.rm = TRUE), .groups = "drop")
+  
+  # Ordenar los datos por partido y año
+  votos_ordenados <- votos_agrupados |> 
+    arrange(Partido, anno)
+  
+  # Calcular el crecimiento o disminución porcentual entre elecciones consecutivas
+  # Usamos lag() para obtener los votos del año anterior
+  # En las elecciones en las que un determinado partido aparece por primera vez, el cambio
+  # porcentual es 0
+  crecimiento <- votos_ordenados |> 
+    group_by(Partido) |> 
+    mutate(cambio_pct = ifelse(is.na(lag(total_votos)), 0, (total_votos - lag(total_votos)) / lag(total_votos) * 100)) |> 
+    ungroup()
+  
+  return(crecimiento)
+}
+
+
+
+# ¿Cómo calibrar el error de las encuestas (recordemos que las encuestas son de intención de voto a nivel nacional)?
+
+# Agrupar varios partidos a la misma sigla
+surveys_clean_siglas <- surveys_clean |> 
+  mutate(Partido=case_when(
+    str_detect(Partido, "PSOE") ~ "PSOE",
+    str_detect(Partido, "PP") ~ "PP",
+    str_detect(Partido, "C's") ~ "C's",
+    str_detect(Partido, "PNV") ~ "PNV",
+    str_detect(Partido, "BNGO") ~ "BNG",
+    str_detect(Partido, "CIU") ~ "CIU",
+    str_detect(Partido, "UP") ~ "UP",
+    str_detect(Partido, "ERC") ~ "ERC",
+    str_detect(Partido, "EH-BILDU") ~ "EH-BILDU",
+    str_detect(Partido, "MP") ~ "MP",
+    str_detect(Partido, "VOX") ~ "VOX",
+    TRUE ~ "OTROS",
   ))
+# Calcular el porcentaje de votos por partido en las elecciones
+votes_percentage <- election_tidy_with_siglas |> 
+  group_by(anno, siglas) |> 
+  summarise(total_votes = sum(votos, na.rm = TRUE), .groups = "drop_last") |> 
+  mutate(percentage_votes = total_votes / sum(total_votes) * 100) |> 
+  ungroup()
+
+# Calcular el porcentaje de intención de voto por partido en las encuestas
+survey_percentage <- surveys_clean_siglas |> 
+  mutate(date_elec = year(date_elec)) |> 
+  group_by(date_elec, Partido) |> 
+  summarise(mean_intention = mean(value, na.rm = TRUE), .groups = "drop_last") |> 
+  mutate(percentage_intention = mean_intention / sum(mean_intention) * 100) |> 
+  ungroup()
+
+# Unir ambas tablas y calcular el error
+error_calibration <- votes_percentage |> 
+  inner_join(survey_percentage, by = c("anno" = "date_elec", "siglas" = "Partido")) |>
+  mutate(error = abs(percentage_votes - percentage_intention))
+
+
+
+
+
+```
+
+```{r}
+{r}
+
+#Mendoza
+
+#Relación entre el censo y el voto mediante un mapa:
+
+
+indice <- election_tidy_with_siglas|>
+  mutate("key"=glue("{codigo_ccaa}-{codigo_provincia}-{codigo_municipio}")) |> 
+  drop_na(votos_candidaturas, censo) |> 
+  summarise("indice"= sum(votos_candidaturas)/sum(censo), .by=key)
+
+
+
+  mapa<-mapSpain::esp_get_munic() |> 
+     mutate("key"=glue("{codauto}-{cpro}-{cmun}"))
+  
+  mapa_indice<-mapa|> 
+  left_join(indice, by=c("key"))
+
+ggplot(mapa_indice)+
+  geom_sf(aes(alpha=indice, fill=indice), color=NA)+
+  scale_alpha_continuous(range = c(0.7,0.9))+
+  scale_fill_gradient2(low = "pink",mid="purple", high = "darkblue", midpoint = 0.5)+
+  labs(fill="votos/censo", alpha="votos/censo")
+
+```
+
+```{r}
+# RODRI
+library(dplyr)
+library(ggplot2)
+
+# Calcular la participación media por cada encuesta
+surveys_participation <- surveys_tidy |> 
+  group_by(date_elec, pollster) |> 
+  summarise(participation = mean(turnout, na.rm = TRUE))
+
+surveys_participation$year <- year(surveys_participation$date_elec)
+
+# Unir los datos de las encuestas con los resultados de las elecciones
+# Suponiendo que election_data tiene la columna "party" para los partidos y "votes" para los votos
+election_parties <- election_tidy |> 
+  group_by(anno, Partido) |> 
+  summarise(total_votes = sum(votos_candidaturas))
+
+# Unir las encuestas con los resultados de las elecciones
+comparison <- surveys_participation |> 
+  left_join(election_parties, by = c("year" = "anno"))
+
+# Crear una columna para identificar si la participación es baja (< 50%) o alta (>= 50%)
+comparison <- comparison |> 
+  mutate(participation_level = ifelse(participation < 50, "Baja", "Alta"))
+
+# Analizar la relación entre la participación y los partidos ganadores
+# Filtrar los partidos con más votos en cada elección (suponiendo que "total_votes" nos da los votos por partido)
+top_parties <- election_parties |> 
+  group_by(anno) |> 
+  top_n(1, total_votes) |> 
+  ungroup()
+
+# Comparar los partidos ganadores con la participación electoral
+top_parties_comparison <- top_parties |> 
+  left_join(comparison, by = c("anno" = "year"))
+
+# Visualización para ver cómo la participación afecta a los partidos ganadores
+ggplot(top_parties_comparison, aes(x = participation, fill = participation_level)) +
+  geom_histogram(bins = 10, alpha = 0.6) +
+  facet_wrap(~ Partido) +
+  labs(title = "Distribución de Participación Electoral por Partido Ganador",
+       x = "Participación (%)",
+       y = "Frecuencia") +
+  theme_minimal()
 ```
