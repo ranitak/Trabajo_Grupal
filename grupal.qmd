@@ -358,7 +358,7 @@ crecimiento_partido <- function(election_tidy) {
 }
 
 
-
+###############################################################################
 # ¿Cómo calibrar el error de las encuestas (recordemos que las encuestas son de intención de voto a nivel nacional)?
 
 # Agrupar varios partidos a la misma sigla
@@ -399,12 +399,40 @@ error_calibration <- votes_percentage |>
 
 
 
+#####################################################################################
+# ¿Qué casas encuestadoras acertaron más y cuáles se desviaron más de los resultados?
+# Calcular el porcentaje de error por casa encuestadora
+media_errors <- surveys_clean_siglas |> 
+  mutate(anno = year(date_elec)) |> 
+  group_by(anno, Partido, media) |> 
+  summarise(
+    mean_intention = mean(value, na.rm = TRUE),
+    .groups = "drop"
+  ) |> 
+  mutate(percentage_intention = mean_intention / sum(mean_intention) * 100) |> 
+  inner_join(votes_percentage, by = c("anno", "Partido" = "siglas")) |> 
+  mutate(error = abs(percentage_votes - percentage_intention))
+
+# Calcular el error promedio por casa encuestadora
+accuracy_by_media <- media_errors |> 
+  group_by(media) |> 
+  summarise(
+    mean_error = mean(error, na.rm = TRUE),
+    .groups = "drop"
+  ) |> 
+  arrange(mean_error)
+
+# Identificar las casas encuestadoras más acertadas y más desviadas
+medios_mas_acertados <- accuracy_by_media |> slice_min(order_by = mean_error, n = 5)
+medios_menos_acertados <- accuracy_by_media |> slice_max(order_by = mean_error, n = 5)
+
+
+
 
 
 ```
 
 ```{r}
-{r}
 
 #Mendoza
 
@@ -477,4 +505,11 @@ ggplot(top_parties_comparison, aes(x = participation, fill = participation_level
        x = "Participación (%)",
        y = "Frecuencia") +
   theme_minimal()
+```
+
+```{r}
+## Ejercicios extras Marcos: 
+# ¿Cuál fue el partido con mayor crecimiento porcentual en votos entre elecciones consecutivas?
+
+# ¿Qué partidos obtuvieron mejores resultados en comparación con las predicciones de las encuestas?
 ```
