@@ -429,9 +429,6 @@ medios_mas_acertados <- accuracy_by_media |> slice_min(order_by = mean_error, n 
 medios_menos_acertados <- accuracy_by_media |> slice_max(order_by = mean_error, n = 5)
 
 
-
-
-
 ```
 
 ```{r}
@@ -440,34 +437,116 @@ medios_menos_acertados <- accuracy_by_media |> slice_max(order_by = mean_error, 
 
 #Relación entre el censo y el voto mediante un mapa:
 
+library(patchwork)
 
-indice <- election_tidy_with_siglas|>
-  mutate("key"=glue("{codigo_ccaa}-{codigo_provincia}-{codigo_municipio}")) |> 
+
+indice <- election_data|>
+  filter(anno==2019) |> 
+  mutate("key"=glue("{codigo_provincia}-{codigo_municipio}")) |> 
   drop_na(votos_candidaturas, censo) |> 
-  summarise("indice"= sum(votos_candidaturas)/sum(censo), .by=key)
+   mutate("indice" = votos_candidaturas / censo) 
 
-
-
-  mapa<-mapSpain::esp_get_munic(region = "CATALUÑA") |> 
-     mutate("key"=glue("{codauto}-{cpro}-{cmun}"))
+mapa<-mapSpain::esp_get_munic() |> 
+     mutate("key"=glue("{cpro}-{cmun}"))
   
-  mapa_indice<-mapa|> 
-  left_join(indice, by=c("key"))
+mapa_indice<- mapa |> 
+  left_join(indice, by="key")
 
-ggplot(mapa_indice)+
+#Grafico de la participacion
+
+g_ind<-ggplot(mapa_indice)+
   geom_sf(aes(alpha=indice, fill=indice), color=NA)+
-  scale_alpha_continuous(range = c(0.5,0.9))+
-  scale_fill_gradient2(low = "pink",mid="purple", high = "darkblue", midpoint = 0.5)+
-  labs(fill="votos/censo", alpha="votos/censo")
+  scale_alpha_continuous(range = c(0.7,0.9))+
+  scale_fill_gradient2(low = "#b9feff",mid="#00c9ff", high = "#040b64", midpoint =
+mean(indice$indice), labels = scales::label_number(scale = 100, suffix="%"))+
+  labs(fill="PARTICIPACION",
+       title = "PARTICIPACION 2019")+
+  theme_minimal()+
+      theme(
+    axis.text = element_blank(),  # Eliminar etiquetas de los ejes
+    axis.ticks = element_blank(),  # Eliminar marcas de los ejes
+    legend.position = "bottom",  # Colocar la leyenda abajo
+    legend.title = element_text(face = "bold", size = 12),  # Estilo de título de la leyenda
+    legend.text = element_text(size = 8, angle = 30),  # Estilo de texto de la leyenda
+    strip.text = element_text(face = "bold", size = 12),  # Estilo de los títulos de las facetas
+    plot.title = element_text(face = "bold", size = 12, hjust = 0.5),  # Estilo del título
+    plot.subtitle = element_text(size = 12, hjust = 0.5) # Estilo del subtítulo
+    )+
+    guides(alpha = "none")
+  
 
-median(as.numeric(election_data$censo))
 
-
-ggplot(mapa_indice |> 
-         left_join(indice, by = "key"))+
+#Grafico del censo de España
+g_cen<-ggplot(mapa_indice)+
   geom_sf(aes(alpha=censo, fill=censo), color=NA)+
   scale_alpha_continuous(range = c(0.7,0.9))+
-  scale_fill_gradient2(low = "pink",mid="purple", high = "darkblue", midpoint =454 )
+  scale_fill_gradient2(low = "#b9feff",mid="#00c9ff", high = "#040b64", midpoint =
+mean(election_data$censo), transform = "log",labels = scales::label_number(scale = 1, accuracy = 1))+
+  labs(title = "CENSO EN 2019")+
+  theme_minimal()+
+      theme(
+    axis.text = element_blank(),  # Eliminar etiquetas de los ejes
+    axis.ticks = element_blank(),  # Eliminar marcas de los ejes
+    legend.position = "bottom",  # Colocar la leyenda abajo
+    legend.title = element_text(face = "bold", size = 12),  # Estilo de título de la leyenda
+    legend.text = element_text(size = 8, angle = 30),  # Estilo de texto de la leyenda
+    strip.text = element_text(face = "bold", size = 12),  # Estilo de los títulos de las facetas
+    plot.title = element_text(face = "bold", size = 12, hjust = 0.5),  # Estilo del título
+    plot.subtitle = element_text(size = 12, hjust = 0.5) # Estilo del subtítulo
+    )+
+    guides(alpha = "none")
+
+
+votos_censo<-g_ind+g_cen   #Sumamos las graficas para compararlas
+print(votos_censo)  
+
+
+colores_partidos <- c(
+  "PSOE" = "#E30000",     
+  "PP" = "#0000FF",       
+  "C's" = "#FF6600",      
+  "PNV" = "#006747",      
+  "BNG" = "#0C6F6D",      
+  "CIU" = "#9C3D28",    
+  "UP" = "#6A0DAD",     
+  "ERC" = "#E24D3A",      
+  "EH-BILDU" = "#006F6F", 
+  "MP" = "#00CFFF",       
+  "VOX" = "#008000",      
+  "OTROS" = "#BEBEBE"     
+)
+
+ganadores_mun<-election_tidy_with_siglas |> 
+  filter(anno==2019) |> 
+  mutate("key"=glue("{codigo_provincia}-{codigo_municipio}")) |> 
+  group_by(key) |> 
+  drop_na(votos) |> 
+  slice_max(votos)
+
+  
+ganadores_mun<-  ganadores_mun|>
+  mutate("Tipo_mun"= if_else(censo>median(ganadores_mun$censo),"Urbana","Rural"))
+
+ggplot(ganadores_mun)+
+  geom_bar(aes(x = siglas, fill = siglas))+
+  scale_fill_manual(values = colores_partidos)+
+  facet_wrap(~Tipo_mun)+
+    labs(title = "GANADORES RURALES Y URBANOS 2019", 
+         x= "PARTIDOS",
+         y= "VICTORIAS")+
+  theme_minimal()+
+      theme(
+    legend.position = "none",  # Quitar la leyenda
+    strip.text = element_text(face = "bold", size = 12),  # Estilo de los títulos de las facetas
+    plot.title = element_text(face = "bold", size = 12, hjust = 0.5),  # Estilo del título
+    plot.subtitle = element_text(size = 12, hjust = 0.5), # Estilo del subtítulo
+    axis.text = element_text(size = 10, angle = 30)
+    )+
+    guides(alpha = "none")
+
+
+
+
 
 ```
 
@@ -492,20 +571,7 @@ participacion_partido <- election_tidy_with_participation |>
 resultados_con_participacion <- participacion_partido |> 
   mutate(resultado_votos = votos_totales / sum(votos_totales) * 100)
 
-colores_partidos <- c(
-  "PSOE" = "#E30000",     
-  "PP" = "#0000FF",       
-  "C's" = "#FF6600",      
-  "PNV" = "#006747",      
-  "BNG" = "#0C6F6D",      
-  "CIU" = "#9C3D28",    
-  "UP" = "#6A0DAD",     
-  "ERC" = "#E24D3A",      
-  "EH-BILDU" = "#006F6F", 
-  "MP" = "#00CFFF",       
-  "VOX" = "#008000",      
-  "OTROS" = "#BEBEBE"     
-)
+
 
 # Crear la gráfica de dispersión con los colores definidos y mejor estética
 ggplot(resultados_con_participacion, aes(x = participacion_media, y = resultado_votos, color = siglas)) + 
@@ -632,17 +698,5 @@ crecimiento_partido <- function(election_tidy) {
     ungroup()
   
   return(crecimiento)
- }
+}
 ```
-
-```{r}
-
-```
-
-\<\<\<\<\<\<\< HEAD
-
-```{r}
-
-```
-
-======= \>\>\>\>\>\>\> 2d33002c8cf1ec65b9a0396c696d6a0e67510b0c
