@@ -267,7 +267,9 @@ cod_mun <- cod_mun |>
 
 # En la tabla surveys (encuestas) hacemos una columna partido, muy simliar al primero de elecciones, además quitamos los partidos que no tienen importancia en la encuesta, es decir q ue no han recibido datos
 surveys_tidy <- surveys |> 
-  pivot_longer(cols = -c(type_survey:turnout), names_to = "Partido", values_to = "value") |> drop_na("value")
+  pivot_longer(cols = -c(type_survey:turnout), names_to = "Partido", values_to = "value") |> 
+  filter(year(date_elec) >= 2008 & year(date_elec) <= 2019) |> 
+  drop_na("value")
 
 
 
@@ -465,6 +467,56 @@ ggplot(mapa_indice)+
 library(dplyr)
 library(ggplot2)
 
+baja_participacion <- election_tidy_with_siglas |> 
+  group_by(anno) |> 
+  summarise(total_participacion = sum(votos_candidaturas) / sum(censo) * 100) |> 
+  filter(total_participacion < 60)
+
+# Comparar los votos de los partidos en estas elecciones con baja participación
+partido_baja_participacion <- election_tidy_with_siglas |> 
+  filter(anno %in% baja_participacion$anno) |> 
+  group_by(anno, Partido) |> 
+  summarise(total_votos = sum(votos, na.rm = TRUE), .groups = "drop") |> 
+  arrange(anno, desc(total_votos))
+```
+
+```{r}
+## Ejercicios extras Marcos: 
+# ¿Cuál fue el partido con mayor crecimiento porcentual en votos entre elecciones consecutivas?
+
+# ¿Qué partidos obtuvieron mejores resultados en comparación con las predicciones de las encuestas?
+```
+
+```{r}
+crecimiento_partido <- function(election_tidy) {
+  # Calcular los votos totales por partido y año
+  votos_agrupados <- election_tidy |> 
+    group_by(anno, Partido) |> 
+    summarise(total_votos = sum(votos, na.rm = TRUE), .groups = "drop")
+  
+  # Ordenar los datos por partido y año
+  votos_ordenados <- votos_agrupados |> 
+    arrange(Partido, anno)
+  
+  # Calcular el crecimiento o disminución porcentual entre elecciones consecutivas
+  # Usamos lag() para obtener los votos del año anterior
+  # En las elecciones en las que un determinado partido aparece por primera vez, el cambio
+  # porcentual es 0
+  crecimiento <- votos_ordenados |> 
+    group_by(Partido) |> 
+    mutate(cambio_pct = ifelse(is.na(lag(total_votos)), 0, (total_votos - lag(total_votos)) / lag(total_votos) * 100)) |> 
+    ungroup()
+  
+  return(crecimiento)
+ }
+```
+
+
+
+```{r}
+library(dplyr)
+library(ggplot2)
+
 # Calcular la participación media por cada encuesta
 surveys_participation <- surveys_tidy |> 
   group_by(date_elec, pollster) |> 
@@ -473,7 +525,7 @@ surveys_participation <- surveys_tidy |>
 surveys_participation$year <- year(surveys_participation$date_elec)
 
 # Unir los datos de las encuestas con los resultados de las elecciones
-# Suponiendo que election_data tiene la columna "party" para los partidos y "votes" para los votos
+# Suponiendo que `election_data` tiene la columna "party" para los partidos y "votes" para los votos
 election_parties <- election_tidy |> 
   group_by(anno, Partido) |> 
   summarise(total_votes = sum(votos_candidaturas))
@@ -507,9 +559,3 @@ ggplot(top_parties_comparison, aes(x = participation, fill = participation_level
   theme_minimal()
 ```
 
-```{r}
-## Ejercicios extras Marcos: 
-# ¿Cuál fue el partido con mayor crecimiento porcentual en votos entre elecciones consecutivas?
-
-# ¿Qué partidos obtuvieron mejores resultados en comparación con las predicciones de las encuestas?
-```
