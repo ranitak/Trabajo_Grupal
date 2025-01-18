@@ -448,7 +448,7 @@ indice <- election_tidy_with_siglas|>
 
 
 
-  mapa<-mapSpain::esp_get_munic() |> 
+  mapa<-mapSpain::esp_get_munic(region = "CATALUÑA") |> 
      mutate("key"=glue("{codauto}-{cpro}-{cmun}"))
   
   mapa_indice<-mapa|> 
@@ -456,9 +456,18 @@ indice <- election_tidy_with_siglas|>
 
 ggplot(mapa_indice)+
   geom_sf(aes(alpha=indice, fill=indice), color=NA)+
-  scale_alpha_continuous(range = c(0.7,0.9))+
+  scale_alpha_continuous(range = c(0.5,0.9))+
   scale_fill_gradient2(low = "pink",mid="purple", high = "darkblue", midpoint = 0.5)+
   labs(fill="votos/censo", alpha="votos/censo")
+
+median(as.numeric(election_data$censo))
+
+
+ggplot(mapa_indice |> 
+         left_join(indice, by = "key"))+
+  geom_sf(aes(alpha=censo, fill=censo), color=NA)+
+  scale_alpha_continuous(range = c(0.7,0.9))+
+  scale_fill_gradient2(low = "pink",mid="purple", high = "darkblue", midpoint =454 )
 
 ```
 
@@ -555,14 +564,15 @@ crecimiento_partido <- function(election_tidy) {
  }
 ```
 
+```{r}
 
+```
+<<<<<<< HEAD
 
 ```{r}
 
 ```
 
-```{r}
 
-```
-
-
+=======
+>>>>>>> 2d33002c8cf1ec65b9a0396c696d6a0e67510b0c
