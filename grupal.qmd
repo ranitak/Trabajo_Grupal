@@ -464,20 +464,63 @@ ggplot(mapa_indice)+
 
 ```{r}
 # RODRI
+# Pregunta 12 
+# c) ¿A quién beneficia la baja participación?
 library(dplyr)
 library(ggplot2)
 
-baja_participacion <- election_tidy_with_siglas |> 
-  group_by(anno) |> 
-  summarise(total_participacion = sum(votos_candidaturas) / sum(censo) * 100) |> 
-  filter(total_participacion < 60)
+election_tidy_with_participation <- election_tidy_with_siglas |> 
+  mutate(participacion = votos / censo)
 
-# Comparar los votos de los partidos en estas elecciones con baja participación
-partido_baja_participacion <- election_tidy_with_siglas |> 
-  filter(anno %in% baja_participacion$anno) |> 
-  group_by(anno, Partido) |> 
-  summarise(total_votos = sum(votos, na.rm = TRUE), .groups = "drop") |> 
-  arrange(anno, desc(total_votos))
+participacion_partido <- election_tidy_with_participation |> 
+  group_by(anno, siglas) |> 
+  summarise(
+    participacion_media = mean(participacion, na.rm = TRUE),
+    votos_totales = sum(votos, na.rm = TRUE),
+    .groups = "drop"
+  )
+
+resultados_con_participacion <- participacion_partido |> 
+  mutate(resultado_votos = votos_totales / sum(votos_totales) * 100)
+
+colores_partidos <- c(
+  "PSOE" = "#E30000",     
+  "PP" = "#0000FF",       
+  "C's" = "#FF6600",      
+  "PNV" = "#006747",      
+  "BNG" = "#0C6F6D",      
+  "CIU" = "#9C3D28",    
+  "UP" = "#6A0DAD",     
+  "ERC" = "#E24D3A",      
+  "EH-BILDU" = "#006F6F", 
+  "MP" = "#00CFFF",       
+  "VOX" = "#008000",      
+  "OTROS" = "#BEBEBE"     
+)
+
+# Crear la gráfica de dispersión con los colores definidos y mejor estética
+ggplot(resultados_con_participacion, aes(x = participacion_media, y = resultado_votos, color = siglas)) + 
+  geom_point(size = 3, alpha = 0.7) +  # Puntos con tamaño ajustado y transparencia
+  geom_smooth(method = "lm", se = FALSE, aes(group = siglas), color = "black", linetype = "dashed") + # Línea de regresión por partido
+  facet_wrap(~ anno, scales = "free_y") + # Facetas por año
+  scale_color_manual(values = colores_partidos) + # Usar los colores definidos
+  labs(
+    title = "Relación entre Participación y Resultados Electorales por Año", 
+    subtitle = "Cada punto representa un partido en una elección, con la participación y el porcentaje de votos",
+    x = "Participación Media (%)",
+    y = "Porcentaje de Votos (%)",
+    color = "Partido"
+  ) +
+  theme_minimal(base_size = 14) +  # Estilo minimalista y tamaño de texto ajustado
+  theme(
+    legend.position = "bottom",  # Colocar la leyenda abajo
+    legend.title = element_text(face = "bold", size = 12),  # Estilo de título de la leyenda
+    legend.text = element_text(size = 10),  # Estilo de texto de la leyenda
+    strip.text = element_text(face = "bold", size = 12),  # Estilo de los títulos de las facetas
+    plot.title = element_text(face = "bold", size = 16, hjust = 0.5),  # Estilo del título
+    plot.subtitle = element_text(size = 12, hjust = 0.5) # Estilo del subtítulo
+    )
+
 ```
 
 ```{r}
@@ -488,6 +531,7 @@ partido_baja_participacion <- election_tidy_with_siglas |>
 ```
 
 ```{r}
+# Rodri
 crecimiento_partido <- function(election_tidy) {
   # Calcular los votos totales por partido y año
   votos_agrupados <- election_tidy |> 
@@ -514,48 +558,11 @@ crecimiento_partido <- function(election_tidy) {
 
 
 ```{r}
-library(dplyr)
-library(ggplot2)
 
-# Calcular la participación media por cada encuesta
-surveys_participation <- surveys_tidy |> 
-  group_by(date_elec, pollster) |> 
-  summarise(participation = mean(turnout, na.rm = TRUE))
-
-surveys_participation$year <- year(surveys_participation$date_elec)
-
-# Unir los datos de las encuestas con los resultados de las elecciones
-# Suponiendo que `election_data` tiene la columna "party" para los partidos y "votes" para los votos
-election_parties <- election_tidy |> 
-  group_by(anno, Partido) |> 
-  summarise(total_votes = sum(votos_candidaturas))
-
-# Unir las encuestas con los resultados de las elecciones
-comparison <- surveys_participation |> 
-  left_join(election_parties, by = c("year" = "anno"))
-
-# Crear una columna para identificar si la participación es baja (< 50%) o alta (>= 50%)
-comparison <- comparison |> 
-  mutate(participation_level = ifelse(participation < 50, "Baja", "Alta"))
-
-# Analizar la relación entre la participación y los partidos ganadores
-# Filtrar los partidos con más votos en cada elección (suponiendo que "total_votes" nos da los votos por partido)
-top_parties <- election_parties |> 
-  group_by(anno) |> 
-  top_n(1, total_votes) |> 
-  ungroup()
-
-# Comparar los partidos ganadores con la participación electoral
-top_parties_comparison <- top_parties |> 
-  left_join(comparison, by = c("anno" = "year"))
-
-# Visualización para ver cómo la participación afecta a los partidos ganadores
-ggplot(top_parties_comparison, aes(x = participation, fill = participation_level)) +
-  geom_histogram(bins = 10, alpha = 0.6) +
-  facet_wrap(~ Partido) +
-  labs(title = "Distribución de Participación Electoral por Partido Ganador",
-       x = "Participación (%)",
-       y = "Frecuencia") +
-  theme_minimal()
 ```
+
+```{r}
+
+```
+
 
