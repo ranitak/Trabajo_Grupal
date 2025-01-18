@@ -533,10 +533,81 @@ ggplot(resultados_con_participacion, aes(x = participacion_media, y = resultado_
 ```
 
 ```{r}
-## Ejercicios extras Marcos: 
-# ¿Cuál fue el partido con mayor crecimiento porcentual en votos entre elecciones consecutivas?
 
-# ¿Qué partidos obtuvieron mejores resultados en comparación con las predicciones de las encuestas?
+## Ejercicios extras Marcos: 
+
+
+# ¿Qué 10 partidos obtuvieron mejores resultados en comparación con las predicciones de las encuestas?
+
+comparativa_partidos <- surveys_clean_siglas |> 
+  mutate(anno = year(date_elec)) |> 
+  group_by(anno, Partido) |> 
+  summarise(
+    mean_intention = mean(value, na.rm = TRUE),
+    .groups = "drop"
+  ) |> 
+  mutate(percentage_intention = mean_intention / sum(mean_intention) * 100) |> 
+  inner_join(votes_percentage, by = c("anno", "Partido" = "siglas")) |> 
+  mutate(diferencia = percentage_votes - percentage_intention) |> 
+  arrange(desc(diferencia)) |> 
+  slice_max(order_by = diferencia, n = 10)
+
+# ¿Cuál es la relación entre el tamaño del censo y la fragmentación del voto (índice de Herfindahl)? Representar los valores de fragmentación en un mapa por comunidades autonomas.
+
+library(mapSpain)
+library(ggplot2)
+library(dplyr)
+
+
+election_tidy_with_siglas <- election_tidy_with_siglas |> 
+  mutate(codigo_ccaa = substr(codigo_ccaa, 1, 2))  
+
+
+fragmentacion_ccaa <- election_tidy_with_siglas |> 
+  group_by(codigo_ccaa, Partido) |> 
+  summarise(votos_totales = sum(votos, na.rm = TRUE), censo_total = sum(censo, na.rm = TRUE), .groups = "drop") |> 
+  group_by(codigo_ccaa) |> 
+  reframe(
+    indice_herfindahl = sum((votos_totales / sum(votos_totales, na.rm = TRUE))^2, na.rm = TRUE),
+    censo_total = unique(censo_total)  
+  )
+
+
+mapa_ccaa <- mapSpain::esp_get_ccaa()
+
+mapa_fragmentacion_ccaa <- mapa_ccaa |> 
+  left_join(fragmentacion_ccaa, by = c("codauto" = "codigo_ccaa"))
+
+ggplot(mapa_fragmentacion_ccaa) +
+  geom_sf(aes(fill = indice_herfindahl), color = "gray90", size = 0.1) +
+  geom_sf_text(
+    data = mapa_fragmentacion_ccaa |>  filter(!is.na(indice_herfindahl)),
+    aes(label = sprintf("%.2f", indice_herfindahl)),
+    size = 2,
+    color = "black",
+    fontface = "bold"
+  ) +
+  scale_fill_gradientn(
+    colors = c("lightcoral", "gold", "forestgreen"),
+    name = "Fragmentación",
+    limits = c(0, 1),
+    labels = scales::percent_format(accuracy = 1)
+  ) +
+  labs(
+    title = "Fragmentación del Voto por Comunidades Autonomas en España",
+    subtitle = "Índice de Herfindahl",
+    fill = "Fragmentación (Herfindahl)"
+  ) +
+  coord_sf(datum = NA) + 
+  theme_minimal() +
+  theme(
+    plot.title = element_text(hjust = 0.5, size = 14, face = "bold"),
+    plot.subtitle = element_text(hjust = 0.5, size = 12),
+    legend.position = "right",
+    legend.title = element_text(size = 10),
+    legend.text = element_text(size = 8),
+    panel.grid = element_blank()
+  )
 ```
 
 ```{r}
@@ -567,12 +638,11 @@ crecimiento_partido <- function(election_tidy) {
 ```{r}
 
 ```
-<<<<<<< HEAD
+
+\<\<\<\<\<\<\< HEAD
 
 ```{r}
 
 ```
 
-
-=======
->>>>>>> 2d33002c8cf1ec65b9a0396c696d6a0e67510b0c
+======= \>\>\>\>\>\>\> 2d33002c8cf1ec65b9a0396c696d6a0e67510b0c
