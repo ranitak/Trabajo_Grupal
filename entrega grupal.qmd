@@ -669,9 +669,9 @@ encuestas_int <- ggplotly(encuestas)
 encuestas_int
 ```
 
-Ejercicios extra Álvaro
 
-Pregunta 1: ¿Cómo han cambiado las categorías de votos (mayoría, empate, minoría) por provincia desde 2008 hasta 2019?
+
+¿Cómo han cambiado las categorías de votos (mayoría, empate, minoría) por provincia desde 2008 hasta 2019?
 
 ```{r}
 
@@ -706,7 +706,7 @@ ggplot(datos_comparacion, aes(x = fct_reorder(codigo_provincia, -porcentaje_voto
 <<<<<<< HEAD
 ---------------------------------------------------------------------------
 
-##Pregunta 2: ¿Cuáles son las provincias con mayor y menor cambio en los votos entre 2008 y 2019?
+¿Cuáles son las provincias con mayor y menor cambio en los votos entre 2008 y 2019?
 
 ```{r}
 
@@ -728,8 +728,9 @@ ggplot(cambio_votos, aes(x = fct_reorder(codigo_provincia, cambio_votos), y = ca
   theme_minimal() +
   theme(axis.text.x = element_text(angle = 90, hjust = 1))  # Mejor visualización de las provincias
 ```
+
 =======
-Pregunta extra Mendoza: Posible dependencia
+Posible dependencia
 
 ```{r}
 
@@ -756,8 +757,9 @@ print(paste("Coeficiente de correlación de Pearson:", round(correlacion_1, 2)))
 
 
 ```
+
 ======
-##Pregunta 1: ¿Cuál es la tendencia esperada para los próximos 12 meses en el conjunto de datos?
+¿Cuál es la tendencia esperada para los próximos 12 meses en el conjunto de datos?
 ```{r}
 
 library(forecast)
