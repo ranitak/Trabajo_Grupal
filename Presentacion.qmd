@@ -1,7 +1,8 @@
 ---
 title: "Entrega grupal"
-author: "Álvaro Pascual (DNI: 01672747-A), Rodrigo Castillo (DNI: 29624141-A), 
-         Marcos Martínez (DNI: 50635315-X), Jorge Mendoza (DNI: 51518202-L)"
+author: |
+  Álvaro Pascual (DNI: 01672747-A), Rodrigo Castillo (DNI: 29624141-A),
+  Marcos Martínez (DNI: 50635315-X), Jorge Mendoza (DNI: 51518202-L)
 format:
   revealjs:
     theme: sky
@@ -180,7 +181,7 @@ Se valorará la originalidad (en comparación con el resto de trabajos, ya sea e
 
 ------------------------------------------------------------------------
 
-## Evaluación
+## Evaluación 2
 
 Una vez que tengas los elementos obligatorios de tu base de datos más o menos completos, piensa antes de escribir código: ¿qué podría ser interesante? ¿Qué necesito para obtener un resumen tanto numérico como visual?
 
@@ -329,7 +330,7 @@ crecimiento_partido <- function(election_tidy) {
 }
 
 
-###############################################################################
+
 # ¿Cómo calibrar el error de las encuestas (recordemos que las encuestas son de intención de voto a nivel nacional)?
 
 # Agrupar varios partidos a la misma sigla
@@ -370,7 +371,7 @@ error_calibration <- votes_percentage |>
 
 
 
-#####################################################################################
+
 # ¿Qué casas encuestadoras acertaron más y cuáles se desviaron más de los resultados?
 # Calcular el porcentaje de error por casa encuestadora
 media_errors <- surveys_clean_siglas |> 
@@ -397,11 +398,11 @@ accuracy_by_media <- media_errors |>
 medios_mas_acertados <- accuracy_by_media |> slice_min(order_by = mean_error, n = 5)
 medios_menos_acertados <- accuracy_by_media |> slice_max(order_by = mean_error, n = 5)
 
-
 ```
 
-```{r}
+Medio
 
+```{r}
 #Mendoza
 
 #Relación entre el censo y el voto mediante un mapa:
@@ -496,7 +497,7 @@ ganadores_mun<-election_tidy_with_siglas |>
 ganadores_mun<-  ganadores_mun|>
   mutate("Tipo_mun"= if_else(censo>median(ganadores_mun$censo),"Urbana","Rural"))
 
-ggplot(ganadores_mun)+
+ganadores <-ggplot(ganadores_mun)+
   geom_bar(aes(x = siglas, fill = siglas))+
   scale_fill_manual(values = colores_partidos)+
   facet_wrap(~Tipo_mun)+
@@ -513,18 +514,18 @@ ggplot(ganadores_mun)+
     )+
     guides(alpha = "none")
 
+ganadores_interactivo <- ggplotly(ganadores)
 
-
-
-
+print(ganadores_interactivo)
 ```
+
+
 
 ```{r}
 # RODRI
 # Pregunta 12 
 # c) ¿A quién beneficia la baja participación?
-library(dplyr)
-library(ggplot2)
+
 
 election_tidy_with_participation <- election_tidy_with_siglas |> 
   mutate(participacion = votos / censo)
@@ -672,7 +673,6 @@ crecimiento_partido <- function(election_tidy) {
 
 
 ```{r}
-<<<<<<< Updated upstream
 # Ejercicios extra Rodrigo:
 
 # 1 ¿Qué comunidad autónoma tiene la mayor participación electoral promedio en las elecciones entre 2008 y 2019?
