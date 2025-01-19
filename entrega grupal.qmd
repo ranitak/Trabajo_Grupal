@@ -635,3 +635,37 @@ encuestas <- ggplot(participacion_por_partido, aes(x = reorder(Partido, -mean_pa
 encuestas_int <- ggplotly(encuestas)
 encuestas_int
 ```
+
+##Ejercicios extra Álvaro
+
+##Pregunta 1: ¿Cómo han cambiado las categorías de votos (mayoría, empate, minoría) por provincia desde 2008 hasta 2019?
+
+```{r}
+
+
+# Calcular el porcentaje de votos por provincia y año
+datos_comparacion <- election_tidy |> 
+  group_by(codigo_provincia, anno) |> 
+  mutate(porcentaje_voto = votos / sum(votos) * 100)
+
+# Definir las categorías de mayoría, empate y minoría
+datos_comparacion$categoría <- case_when(
+  datos_comparacion$porcentaje_voto > 50 ~ "Mayoría",
+  datos_comparacion$porcentaje_voto >= 45 & datos_comparacion$porcentaje_voto <= 50 ~ "Empate",
+  TRUE ~ "Minoría"
+)
+
+# Convertir 'categoría' en un factor ordenado
+datos_comparacion$categoría <- fct_relevel(datos_comparacion$categoría, "Minoría", "Empate", "Mayoría")
+
+
+
+# Gráfico único con la distribución de las categorías de votos por provincia y año
+ggplot(datos_comparacion, aes(x = fct_reorder(codigo_provincia, -porcentaje_voto), fill = categoría)) +
+  geom_bar(stat = "count", position = "stack") +
+  labs(title = "Distribución de las categorías de votos por provincia (2008 vs 2019)",
+       x = "Provincia", y = "Número de votos", fill = "Categoría de voto") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1),
+        legend.position = "none")
+```
