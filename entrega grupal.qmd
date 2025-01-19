@@ -1,8 +1,13 @@
 ---
 title: "Entrega grupal"
-author: "Álvaro Pascual (DNI: 01672747-A), Rodrigo Castillo (DNI: 29624141-A),   Marcos Martínez (DNI: 50635315-X), Jorge Mendoza (DNI: 51518202-L)"
-format: revealjs
-editor: visual
+author: "Álvaro Pascual (DNI: 01672747-A), Rodrigo Castillo (DNI: 29624141-A), 
+         Marcos Martínez (DNI: 50635315-X), Jorge Mendoza (DNI: 51518202-L)"
+format:
+  revealjs:
+    theme: sky
+    embed-resources: true
+execute: 
+  echo: true
 ---
 
 ## Paquetes necesarios
@@ -17,6 +22,7 @@ library(dplyr)
 library(ggplot2)
 library(plotly)
 library(patchwork)
+
 
 ```
 
@@ -192,7 +198,6 @@ crecimiento_partido <- function(election_tidy) {
 # c) ¿A quién beneficia la baja participación?
 ```{r}
 
-
 election_tidy_with_participation <- election_tidy_with_siglas |> 
   mutate(participacion = votos / censo)
 
@@ -207,6 +212,21 @@ participacion_partido <- election_tidy_with_participation |>
 resultados_con_participacion <- participacion_partido |> 
   mutate(resultado_votos = votos_totales / sum(votos_totales) * 100)
 
+
+colores_partidos <- c(
+  "PSOE" = "#E30000",     
+  "PP" = "#0000FF",       
+  "C's" = "#FF6600",      
+  "PNV" = "#006747",      
+  "BNG" = "#0C6F6D",      
+  "CIU" = "#9C3D28",    
+  "UP" = "#6A0DAD",     
+  "ERC" = "#E24D3A",      
+  "EH-BILDU" = "#006F6F", 
+  "MP" = "#00CFFF",       
+  "VOX" = "#008000",      
+  "OTROS" = "#BEBEBE"     
+)
 
 
 # Crear la gráfica de dispersión con los colores definidos y mejor estética
@@ -373,21 +393,6 @@ mean(election_data$censo), transform = "log",labels = scales::label_number(scale
 votos_censo<-g_ind+g_cen   #Sumamos las graficas para compararlas
 print(votos_censo)  
 
-
-colores_partidos <- c(
-  "PSOE" = "#E30000",     
-  "PP" = "#0000FF",       
-  "C's" = "#FF6600",      
-  "PNV" = "#006747",      
-  "BNG" = "#0C6F6D",      
-  "CIU" = "#9C3D28",    
-  "UP" = "#6A0DAD",     
-  "ERC" = "#E24D3A",      
-  "EH-BILDU" = "#006F6F", 
-  "MP" = "#00CFFF",       
-  "VOX" = "#008000",      
-  "OTROS" = "#BEBEBE"     
-)
 
 ganadores_mun<-election_tidy_with_siglas |> 
   filter(anno==2019) |> 
