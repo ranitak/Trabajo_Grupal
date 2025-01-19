@@ -11,20 +11,19 @@ execute:
   echo: true
 ---
 
-## Indice 
+## Índice
 
 -   Paquetes Necesarios
 
--   Bases de Datos 
+-   Bases de Datos
 
--   Items Obligatorios 
+-   Items Obligatorios
 
 -   Preguntas Extras
 
 ------------------------------------------------------------------------
 
 ## Paquetes necesarios
-
 
 ```{r}
 rm(list = ls())
@@ -39,109 +38,62 @@ library(mapSpain)
 library(plotly)
 ```
 
-------------------------------------------------------------------------
-## Datos
--   `election_data`: archivo con las elecciones al congreso
--   `cod_mun`: archivo con los códigos y nombres de cada municipio
--   `abbrev`: siglas de cada partido
--   `surveys`: encuestas electorales desde 1982.
+| \## Datos - `election_data`: archivo con las elecciones al congreso - `cod_mun`: archivo con los códigos y nombres de cada municipio - `abbrev`: siglas de cada partido - `surveys`: encuestas electorales desde 1982. `f3175f2a-e8a0-4436-be12-b33925b6d220 31b8e172-b470-440e-83d8-e6b185028602:dAB5AHAAZQA6AFoAZwBBAHoAQQBEAEUAQQBOAHcAQQAxAEEARwBZAEEATQBnAEIAaABBAEMAMABBAFoAUQBBADQAQQBHAEUAQQBNAEEAQQB0AEEARABRAEEATgBBAEEAegBBAEQAWQBBAEwAUQBCAGkAQQBHAFUAQQBNAFEAQQB5AEEAQwAwAEEAWQBnAEEAegBBAEQATQBBAE8AUQBBAHkAQQBEAFUAQQBZAGcAQQAyAEEARwBRAEEATQBnAEEAeQBBAEQAQQBBAAoAcABvAHMAaQB0AGkAbwBuADoATwBRAEEAMABBAEQAawBBAAoAcAByAGUAZgBpAHgAOgAKAHMAbwB1AHIAYwBlADoAWQBBAEIAZwBBAEcAQQBBAGUAdwBCAHkAQQBIADAAQQBDAGcAQgBsAEEARwB3AEEAWgBRAEIAagBBAEgAUQBBAGEAUQBCAHYAQQBHADQAQQBYAHcAQgBrAEEARwBFAEEAZABBAEIAaABBAEMAQQBBAFAAQQBBAHQAQQBDAEEAQQBjAGcAQgBsAEEARwBFAEEAWgBBAEIAZgBBAEcATQBBAGMAdwBCADIAQQBDAGcAQQBaAGcAQgBwAEEARwB3AEEAWgBRAEEAZwBBAEQAMABBAEkAQQBBAGkAQQBDADQAQQBMAHcAQgBrAEEARwBFAEEAZABBAEIAaABBAEMAOABBAFoAQQBCAGgAQQBIAFEAQQBiAHcAQgB6AEEARgA4AEEAWgBRAEIAcwBBAEcAVQBBAFkAdwBCAGoAQQBHAGsAQQBiAHcAQgB1AEEARwBVAEEAYwB3AEIAZgBBAEcASQBBAGMAZwBCADEAQQBIAFEAQQBiAHcAQgB6AEEAQwA0AEEAWQB3AEIAegBBAEgAWQBBAEkAZwBBAHAAQQBBAG8AQQBZAHcAQgB2AEEARwBRAEEAWAB3AEIAdABBAEgAVQBBAGIAZwBBAGcAQQBEAHcAQQBMAFEAQQBnAEEASABJAEEAWgBRAEIAaABBAEcAUQBBAFgAdwBCAGoAQQBIAE0AQQBkAGcAQQBvAEEARwBZAEEAYQBRAEIAcwBBAEcAVQBBAEkAQQBBADkAQQBDAEEAQQBJAGcAQQB1AEEAQwA4AEEAWgBBAEIAaABBAEgAUQBBAFkAUQBBAHYAQQBHAE0AQQBiAHcAQgBrAEEARgA4AEEAYgBRAEIAMQBBAEcANABBAEwAZwBCAGoAQQBIAE0AQQBkAGcAQQBpAEEAQwBrAEEAQwBnAEIAegBBAEgAVQBBAGMAZwBCADIAQQBHAFUAQQBlAFEAQgB6AEEAQwBBAEEAUABBAEEAdABBAEMAQQBBAGMAZwBCAGwAQQBHAEUAQQBaAEEAQgBmAEEARwBNAEEAYwB3AEIAMgBBAEMAZwBBAFoAZwBCAHAAQQBHAHcAQQBaAFEAQQBnAEEARAAwAEEASQBBAEEAaQBBAEMANABBAEwAdwBCAGsAQQBHAEUAQQBkAEEAQgBoAEEAQwA4AEEAYQBBAEIAcABBAEgATQBBAGQAQQBCAHYAQQBIAEkAQQBhAFEAQgBqAEEARwBFAEEAYgBBAEIAZgBBAEgATQBBAGQAUQBCAHkAQQBIAFkAQQBaAFEAQgA1AEEASABNAEEATABnAEIAagBBAEgATQBBAGQAZwBBAGkAQQBDAGsAQQBDAGcAQgBoAEEARwBJAEEAWQBnAEIAeQBBAEcAVQBBAGQAZwBBAGcAQQBEAHcAQQBMAFEAQQBnAEEASABJAEEAWgBRAEIAaABBAEcAUQBBAFgAdwBCAGoAQQBIAE0AQQBkAGcAQQBvAEEARwBZAEEAYQBRAEIAcwBBAEcAVQBBAEkAQQBBADkAQQBDAEEAQQBJAGcAQQB1AEEAQwA4AEEAWgBBAEIAaABBAEgAUQBBAFkAUQBBAHYAQQBIAE0AQQBhAFEAQgBuAEEARwB3AEEAWQBRAEIAegBBAEMANABBAFkAdwBCAHoAQQBIAFkAQQBJAGcAQQBwAEEAQQBvAEEAWQBBAEIAZwBBAEcAQQBBAAoAcwB1AGYAZgBpAHgAOgA=:31b8e172-b470-440e-83d8-e6b185028602` |
+|:-----------------------------------------------------------------------|
+| \# Items Obligatorios |
+
+## 1. Los datos deben ser convertidos a tidydata donde sea apropiado.
+
 ```{r}
-election_data <- read_csv(file = "./data/datos_elecciones_brutos.csv")
-cod_mun <- read_csv(file = "./data/cod_mun.csv")
-surveys <- read_csv(file = "./data/historical_surveys.csv")
-abbrev <- read_csv(file = "./data/siglas.csv")
+election_tidy <- election_data |> 
+  pivot_longer(cols = -c(tipo_eleccion:votos_candidaturas), names_to = "Partido", values_to = "votos") |> drop_na("votos")
 ```
 
-------------------------------------------------------------------------
-# Items Obligatorios
+| \## 2. Debes incluir al menos un join entre tablas. `f3175f2a-e8a0-4436-be12-b33925b6d220 31b8e172-b470-440e-83d8-e6b185028602:dAB5AHAAZQA6AFoAZwBBAHoAQQBEAEUAQQBOAHcAQQAxAEEARwBZAEEATQBnAEIAaABBAEMAMABBAFoAUQBBADQAQQBHAEUAQQBNAEEAQQB0AEEARABRAEEATgBBAEEAegBBAEQAWQBBAEwAUQBCAGkAQQBHAFUAQQBNAFEAQQB5AEEAQwAwAEEAWQBnAEEAegBBAEQATQBBAE8AUQBBAHkAQQBEAFUAQQBZAGcAQQAyAEEARwBRAEEATQBnAEEAeQBBAEQAQQBBAAoAcABvAHMAaQB0AGkAbwBuADoATQBRAEEAMQBBAEQAWQBBAE8AQQBBAD0ACgBwAHIAZQBmAGkAeAA6AAoAcwBvAHUAcgBjAGUAOgBZAEEAQgBnAEEARwBBAEEAZQB3AEIAeQBBAEgAMABBAEMAZwBBAEsAQQBHAEEAQQBZAEEAQgBnAEEAQQA9AD0ACgBzAHUAZgBmAGkAeAA6AA==:31b8e172-b470-440e-83d8-e6b185028602` |
+|:-----------------------------------------------------------------------|
+| \## 3. Recordatorio: información = varianza |
 
-------------------------------------------------------------------------
-
-## 1.  Los datos deben ser convertidos a tidydata donde sea apropiado.
+## 4. Los paquetes `{glue}`, `{forcats}` y `{lubridate}` deben ser utilizados en algún punto
 
 ```{r}
 
 ```
 
+| \## 5. Los siguientes elementos deben usarse al menos una vez: mutate, summarise, group_by (o su equivalente), case_when `f3175f2a-e8a0-4436-be12-b33925b6d220 31b8e172-b470-440e-83d8-e6b185028602:dAB5AHAAZQA6AFoAZwBBAHoAQQBEAEUAQQBOAHcAQQAxAEEARwBZAEEATQBnAEIAaABBAEMAMABBAFoAUQBBADQAQQBHAEUAQQBNAEEAQQB0AEEARABRAEEATgBBAEEAegBBAEQAWQBBAEwAUQBCAGkAQQBHAFUAQQBNAFEAQQB5AEEAQwAwAEEAWQBnAEEAegBBAEQATQBBAE8AUQBBAHkAQQBEAFUAQQBZAGcAQQAyAEEARwBRAEEATQBnAEEAeQBBAEQAQQBBAAoAcABvAHMAaQB0AGkAbwBuADoATQBnAEEAdwBBAEQAZwBBAE4AUQBBAD0ACgBwAHIAZQBmAGkAeAA6AAoAcwBvAHUAcgBjAGUAOgBZAEEAQgBnAEEARwBBAEEAZQB3AEIAeQBBAEgAMABBAEMAZwBBAEsAQQBHAEEAQQBZAEEAQgBnAEEAQQA9AD0ACgBzAHUAZgBmAGkAeAA6AA==:31b8e172-b470-440e-83d8-e6b185028602` |
+|:-----------------------------------------------------------------------|
+| \## 6. Deberéis definir al menos una función (con más de 5 líneas de código) |
 
-------------------------------------------------------------------------
-## 2.  Debes incluir al menos un join entre tablas.
-```{r}
+## 7. Contamos con muchos partidos que se presentan a las elecciones. Solo nos interesarán los siguientes partidos:
 
-```
-
-------------------------------------------------------------------------
-## 3.  Recordatorio: información = varianza
-```{r}
-
-```
-
-------------------------------------------------------------------------
-## 4.  Los paquetes `{glue}`, `{forcats}` y `{lubridate}` deben ser utilizados en algún punto
-```{r}
-
-```
-
-------------------------------------------------------------------------
-## 5.  Los siguientes elementos deben usarse al menos una vez: mutate, summarise, group_by (o su equivalente), case_when
-```{r}
-
-```
-
-------------------------------------------------------------------------
-## 6.  Deberéis definir al menos una función (con más de 5 líneas de código)
-```{r}
-
-```
-
-------------------------------------------------------------------------
-
-## 7.  Contamos con muchos partidos que se presentan a las elecciones. Solo nos interesarán los siguientes partidos:
-
--   PARTIDO SOCIALISTA OBRERO ESPAÑOL 
+-   PARTIDO SOCIALISTA OBRERO ESPAÑOL
 -   PARTIDO POPULAR
--   CIUDADANOS 
+-   CIUDADANOS
 -   PARTIDO NACIONALISTA VASCO
 -   BLOQUE NACIONALISTA GALLEGO
 -   CONVERGÈNCIA I UNIÓ
--   UNIDAS PODEMOS - IU 
+-   UNIDAS PODEMOS - IU
 -   ESQUERRA REPUBLICANA DE CATALUNYA
--   EH - BILDU 
+-   EH - BILDU
 -   MÁS PAÍS
 -   VOX
+
 ```{r}
 
 ```
 
-------------------------------------------------------------------------
-## 8.  Todo lo que no esté en alguno de los anteriores partidos debe ser correctamente reagrupado (y resumido) en `OTROS`
-```{r}
+| \## 8. Todo lo que no esté en alguno de los anteriores partidos debe ser correctamente reagrupado (y resumido) en `OTROS` `f3175f2a-e8a0-4436-be12-b33925b6d220 31b8e172-b470-440e-83d8-e6b185028602:dAB5AHAAZQA6AFoAZwBBAHoAQQBEAEUAQQBOAHcAQQAxAEEARwBZAEEATQBnAEIAaABBAEMAMABBAFoAUQBBADQAQQBHAEUAQQBNAEEAQQB0AEEARABRAEEATgBBAEEAegBBAEQAWQBBAEwAUQBCAGkAQQBHAFUAQQBNAFEAQQB5AEEAQwAwAEEAWQBnAEEAegBBAEQATQBBAE8AUQBBAHkAQQBEAFUAQQBZAGcAQQAyAEEARwBRAEEATQBnAEEAeQBBAEQAQQBBAAoAcABvAHMAaQB0AGkAbwBuADoATQBnAEEANQBBAEQASQBBAE0AdwBBAD0ACgBwAHIAZQBmAGkAeAA6AAoAcwBvAHUAcgBjAGUAOgBZAEEAQgBnAEEARwBBAEEAZQB3AEIAeQBBAEgAMABBAEMAZwBBAEsAQQBHAEEAQQBZAEEAQgBnAEEAQQA9AD0ACgBzAHUAZgBmAGkAeAA6AA==:31b8e172-b470-440e-83d8-e6b185028602` |
+|:-----------------------------------------------------------------------|
+| \## 9. Las siglas deben ser usadas en las visualizaciones (ideas en <https://r-graph-gallery.com/>). |
 
-```
-
-------------------------------------------------------------------------
-## 9.  Las siglas deben ser usadas en las visualizaciones (ideas en <https://r-graph-gallery.com/>).
-```{r}
-
-```
-
-------------------------------------------------------------------------
 ## 10. Debes usar todos los archivos en algún momento.
+
 ```{r}
 
 ```
 
-------------------------------------------------------------------------
-## 11. Debes descartar las encuestas que:
--   se refieran a elecciones anteriores a 2008
--   sean a pie de urna
--   tamaño muestral desconocido o inferior a 500.
--   tenga 1 día o menos de trabajo de campo.
-```{r}
-
-```
-
-------------------------------------------------------------------------
+|  |
+|:-----------------------------------------------------------------------|
+| \## 11. Debes descartar las encuestas que: - se refieran a elecciones anteriores a 2008 - sean a pie de urna - tamaño muestral desconocido o inferior a 500. - tenga 1 día o menos de trabajo de campo. |
 
 ## 12. Deberás responder obligatoriamente a las siguientes preguntas (más aquellas que consideres analizar para distinguirte del resto)
 
@@ -152,24 +104,14 @@ abbrev <- read_csv(file = "./data/siglas.csv")
 -   ¿A quién beneficia la baja participación?
 
 -   ¿Cómo analizar la relación entre censo y voto? ¿Es cierto que determinados partidos ganan en las zonas rurales?
+
 ```{r}
 
 ```
 
-
-------------------------------------------------------------------------
-## 13. ¿Cómo calibrar el error de las encuestas (recordemos que las encuestas son de intención de voto a nivel nacional)?
-```{r}
-
-```
-
-------------------------------------------------------------------------
-## 14.  ¿Qué casas encuestadoras acertaron más y cuáles se desviaron más de los resultados?
-```{r}
-
-```
-
-------------------------------------------------------------------------
+| \## 13. ¿Cómo calibrar el error de las encuestas (recordemos que las encuestas son de intención de voto a nivel nacional)? `f3175f2a-e8a0-4436-be12-b33925b6d220 31b8e172-b470-440e-83d8-e6b185028602:dAB5AHAAZQA6AFoAZwBBAHoAQQBEAEUAQQBOAHcAQQAxAEEARwBZAEEATQBnAEIAaABBAEMAMABBAFoAUQBBADQAQQBHAEUAQQBNAEEAQQB0AEEARABRAEEATgBBAEEAegBBAEQAWQBBAEwAUQBCAGkAQQBHAFUAQQBNAFEAQQB5AEEAQwAwAEEAWQBnAEEAegBBAEQATQBBAE8AUQBBAHkAQQBEAFUAQQBZAGcAQQAyAEEARwBRAEEATQBnAEEAeQBBAEQAQQBBAAoAcABvAHMAaQB0AGkAbwBuADoATgBBAEEAegBBAEQAVQBBAE4AZwBBAD0ACgBwAHIAZQBmAGkAeAA6AAoAcwBvAHUAcgBjAGUAOgBZAEEAQgBnAEEARwBBAEEAZQB3AEIAeQBBAEgAMABBAEMAZwBBAEsAQQBHAEEAQQBZAEEAQgBnAEEAQQA9AD0ACgBzAHUAZgBmAGkAeAA6AA==:31b8e172-b470-440e-83d8-e6b185028602` |
+|:-----------------------------------------------------------------------|
+| \## 14. ¿Qué casas encuestadoras acertaron más y cuáles se desviaron más de los resultados? |
 
 ## Evaluación
 
@@ -519,8 +461,6 @@ ganadores_interactivo <- ggplotly(ganadores)
 print(ganadores_interactivo)
 ```
 
-
-
 ```{r}
 # RODRI
 # Pregunta 12 
@@ -673,7 +613,6 @@ crecimiento_partido <- function(election_tidy) {
 }
 ```
 
-
 ```{r}
 # Ejercicios extra Rodrigo:
 
@@ -787,5 +726,3 @@ encuestas <- ggplot(participacion_por_partido, aes(x = reorder(Partido, -mean_pa
 encuestas_int <- ggplotly(encuestas)
 encuestas_int
 ```
-
-
