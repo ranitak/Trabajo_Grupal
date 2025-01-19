@@ -23,6 +23,7 @@ library(ggplot2)
 library(plotly)
 library(patchwork)
 library(mapSpain)
+library(forecast)
 
 
 ```
@@ -551,7 +552,7 @@ graf_frag<-ggplot(mapa_fragmentacion_ccaa) +
 ------------------------------------------------------------------------
 
 ```{r}
-print(graf_)
+print(graf_frag)
 ```
 
 ------------------------------------------------------------------------
@@ -818,7 +819,6 @@ ggplot(cambio_votos, aes(x = fct_reorder(codigo_provincia, cambio_votos), y = ca
 ¿Cuál es la tendencia esperada para los próximos 12 meses en el conjunto de datos?
 
 ```{r}
-library(forecast)
 
 
 # Filtrar o seleccionar datos relevantes. Por ejemplo, para los datos de una provincia en específico:
