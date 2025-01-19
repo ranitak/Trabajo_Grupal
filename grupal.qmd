@@ -705,7 +705,6 @@ crecimiento_partido <- function(election_tidy) {
 }
 ```
 
-
 ```{r}
 # Ejercicios extra Rodrigo:
 
@@ -817,6 +816,8 @@ encuestas <- ggplot(participacion_por_partido, aes(x = reorder(Partido, -mean_pa
 encuestas_int <- ggplotly(encuestas)
 encuestas_int
 ```
+<<<<<<< HEAD
+=======
 
 
 ```{r}
@@ -895,3 +896,4 @@ ggplot(cambio_votos, aes(x = fct_reorder(codigo_provincia, cambio_votos), y = ca
   theme_minimal() +
   theme(axis.text.x = element_text(angle = 90, hjust = 1))  # Mejor visualización de las provincias
 ```
+>>>>>>> 2d29c58293f087d7c0a9be858e4679606991ab79
