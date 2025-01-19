@@ -544,7 +544,7 @@ resultados_con_participacion <- participacion_partido |>
 
 
 # Crear la gráfica de dispersión con los colores definidos y mejor estética
-ggplot(resultados_con_participacion, aes(x = participacion_media, y = resultado_votos, color = siglas)) + 
+resultados <- ggplot(resultados_con_participacion, aes(x = participacion_media, y = resultado_votos, color = siglas)) + 
   geom_point(size = 3, alpha = 0.7) +  # Puntos con tamaño ajustado y transparencia
   geom_smooth(method = "lm", se = FALSE, aes(group = siglas), color = "black", linetype = "dashed") + # Línea de regresión por partido
   facet_wrap(~ anno, scales = "free_y") + # Facetas por año
@@ -566,6 +566,8 @@ ggplot(resultados_con_participacion, aes(x = participacion_media, y = resultado_
     plot.subtitle = element_text(size = 12, hjust = 0.5) # Estilo del subtítulo
     )
 
+resultados_interactivo <- ggplotly(resultados)
+resultados_interactivo
 ```
 
 ```{r}
@@ -713,7 +715,7 @@ participacion_media_ccaa <- participacion_media_ccaa |>
 
 
 
-ggplot(participacion_media_ccaa, aes(x = reorder(nombre_ccaa, -participacion_promedio), y = participacion_promedio, fill = nombre_ccaa)) +
+participacion <- ggplot(participacion_media_ccaa, aes(x = reorder(nombre_ccaa, -participacion_promedio), y = participacion_promedio, fill = nombre_ccaa)) +
   geom_bar(stat = "identity", show.legend = FALSE, width = 0.8) +
   geom_text(aes(label = round(participacion_promedio, 2)), 
             vjust = -0.3,  
@@ -739,6 +741,9 @@ ggplot(participacion_media_ccaa, aes(x = reorder(nombre_ccaa, -participacion_pro
     panel.grid.minor = element_blank(),
     panel.background = element_rect(fill = "white", color = "white"))
 
+participacion_int <- ggplotly(participacion)
+participacion_int
+
 
 # 2 ¿Cuál es la relación entre la participación electoral y el tamaño de la muestra de las encuestas?
 encuestas_filtradas <- surveys_clean_siglas |> 
@@ -763,7 +768,7 @@ partidos_colores <- c(
   "Otros" = "#BDBDBD"    
 )
 
-ggplot(participacion_por_partido, aes(x = reorder(Partido, -mean_participacion), y = mean_participacion, fill = Partido)) +
+encuestas <- ggplot(participacion_por_partido, aes(x = reorder(Partido, -mean_participacion), y = mean_participacion, fill = Partido)) +
   geom_bar(stat = "identity", width = 0.7) +  
   scale_fill_manual(values = partidos_colores) +  
   labs(title = "Participación Electoral Promedio por Partido (Tamaño de Muestra > 500)",
@@ -778,6 +783,9 @@ ggplot(participacion_por_partido, aes(x = reorder(Partido, -mean_participacion),
     panel.grid.minor.x = element_blank()   
   ) +
   coord_flip()
+
+encuestas_int <- ggplotly(encuestas)
+encuestas_int
 ```
 
 
