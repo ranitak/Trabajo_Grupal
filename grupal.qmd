@@ -819,3 +819,79 @@ encuestas_int
 ```
 
 
+```{r}
+##Extra Álvaro
+##Pregunta 1: ¿Cómo han cambiado las categorías de votos (mayoría, empate, minoría) por provincia desde 2008 hasta 2019?
+# Calcular el porcentaje de votos por provincia y año
+datos_comparacion <- election_tidy |> 
+  group_by(codigo_provincia, anno) |> 
+  mutate(porcentaje_voto = votos / sum(votos) * 100)
+
+# Definir las categorías de mayoría, empate y minoría
+datos_comparacion$categoría <- case_when(
+  datos_comparacion$porcentaje_voto > 50 ~ "Mayoría",
+  datos_comparacion$porcentaje_voto >= 45 & datos_comparacion$porcentaje_voto <= 50 ~ "Empate",
+  TRUE ~ "Minoría"
+)
+
+# Convertir 'categoría' en un factor ordenado
+datos_comparacion$categoría <- fct_relevel(datos_comparacion$categoría, "Minoría", "Empate", "Mayoría")
+
+
+
+# Gráfico único con la distribución de las categorías de votos por provincia y año
+ggplot(datos_comparacion, aes(x = fct_reorder(codigo_provincia, -porcentaje_voto), fill = categoría)) +
+  geom_bar(stat = "count", position = "stack") +
+  labs(title = "Distribución de las categorías de votos por provincia (2008 vs 2019)",
+       x = "Provincia", y = "Número de votos", fill = "Categoría de voto") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1),
+        legend.position = "none")
+
+##Pregunta 2: ¿Cuáles son las provincias con mayor y menor cambio en los votos entre 2008 y 2019?
+
+
+
+# Calcular el cambio de votos entre 2008 y 2019 por provincia
+cambio_votos <- election_tidy |> 
+  filter(anno %in% c(2008, 2019)) |> 
+  group_by(codigo_provincia, anno) |> 
+  summarise(total_votos = sum(votos)) |> 
+  spread(anno, total_votos) |> 
+  mutate(cambio_votos = `2019` - `2008`)
+
+# Crear gráfico de puntos para mostrar el cambio de votos por provincia
+ggplot(cambio_votos, aes(x = fct_reorder(codigo_provincia, cambio_votos), y = cambio_votos)) +
+  geom_point(size = 3, color = "blue") +
+  geom_segment(aes(xend = codigo_provincia, yend = 0), color = "red") + # Línea que conecta con el eje 0
+  labs(title = "Cambio de votos entre 2008 y 2019 por provincia",
+       x = "Provincia", y = "Cambio en los votos") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1))  # Mejor visualización de las provincias
+```
+
+
+
+
+##Pregunta 2: ¿Cuáles son las provincias con mayor y menor cambio en los votos entre 2008 y 2019?
+
+```{r}
+
+
+# Calcular el cambio de votos entre 2008 y 2019 por provincia
+cambio_votos <- election_tidy |> 
+  filter(anno %in% c(2008, 2019)) |> 
+  group_by(codigo_provincia, anno) |> 
+  summarise(total_votos = sum(votos)) |> 
+  spread(anno, total_votos) |> 
+  mutate(cambio_votos = `2019` - `2008`)
+
+# Crear gráfico de puntos para mostrar el cambio de votos por provincia
+ggplot(cambio_votos, aes(x = fct_reorder(codigo_provincia, cambio_votos), y = cambio_votos)) +
+  geom_point(size = 3, color = "blue") +
+  geom_segment(aes(xend = codigo_provincia, yend = 0), color = "red") + # Línea que conecta con el eje 0
+  labs(title = "Cambio de votos entre 2008 y 2019 por provincia",
+       x = "Provincia", y = "Cambio en los votos") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1))  # Mejor visualización de las provincias
+```
