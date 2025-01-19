@@ -27,7 +27,7 @@ library(mapSpain)
 
 ```
 
-------------------------------------------------------------------------
+
 
 ### Datos
 
@@ -69,6 +69,11 @@ abbrev_g<-abbrev |>
 
 ```
 
+<<<<<<< Updated upstream
+=======
+
+
+>>>>>>> Stashed changes
 # Hacemos que si un partido tienen asiganda varias abreviaturas se quede con la primera y UNimos elecciones con abreaviaturas, para que en elecciones salga la abrevaitura de cada partido
 
 ```{r}
@@ -141,8 +146,14 @@ resultados_grandes_municipios <- election_tidy_with_siglas |>
   ungroup()  
 ```
 
+<<<<<<< Updated upstream
 # 12.b) ¿Qué partido fue el segundo cuando el primero fue el PSOE? ¿Y cuando el primero fue el PP?
 
+=======
+
+# b) ¿Qué partido fue el segundo cuando el primero fue el PSOE? ¿Y cuando el primero fue el PP?
+`
+>>>>>>> Stashed changes
 ```{r}
 # Obtener los dos primeros partidos por año
 resultados_top2 <- election_tidy_with_siglas |> 
@@ -187,8 +198,13 @@ crecimiento_partido <- function(election_tidy) {
 
 ```
 
+<<<<<<< Updated upstream
 # 12.c) ¿A quién beneficia la baja participación?
 
+=======
+
+# c) ¿A quién beneficia la baja participación?
+>>>>>>> Stashed changes
 ```{r}
 
 election_tidy_with_participation <- election_tidy_with_siglas |> 
@@ -592,6 +608,11 @@ participacion_int
 
 # ¿Cuál es la relación entre la participación electoral y el tamaño de la muestra de las encuestas?
 
+<<<<<<< Updated upstream
+=======
+
+#¿Cuál es la relación entre la participación electoral y el tamaño de la muestra de las encuestas?
+>>>>>>> Stashed changes
 ```{r}
 
 encuestas_filtradas <- surveys_clean_siglas |> 
