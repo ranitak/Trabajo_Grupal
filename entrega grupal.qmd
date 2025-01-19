@@ -756,4 +756,39 @@ print(paste("Coeficiente de correlación de Pearson:", round(correlacion_1, 2)))
 
 
 ```
+======
+##Pregunta 1: ¿Cuál es la tendencia esperada para los próximos 12 meses en el conjunto de datos?
+```{r}
+
+library(forecast)
+
+
+
+# Filtrar o seleccionar datos relevantes. Por ejemplo, para los datos de una provincia en específico:
+election_data <- election_tidy |> 
+  filter(codigo_provincia == "01") |>  
+  select(votos, anno)  
+
+# Convertir los datos en una serie temporal. Asegúrate de que 'anio' sea un valor numérico
+ts_data <- ts(election_data$votos, start = c(min(election_data$anno), 1), frequency = 1)
+
+# Ajustar el modelo ARIMA
+model <- auto.arima(ts_data)
+
+# Realizar el pronóstico para los próximos 12 meses
+forecast_data <- forecast(model, h = 12)
+
+# Graficar los resultados
+autoplot(forecast_data) +
+  ggtitle("Pronóstico para los Próximos 12 Meses") +
+  xlab("Años") +
+  ylab("Valor Esperado") +
+  theme_minimal() +
+  theme(
+    plot.title = element_text(size = 16, face = "bold", hjust = 0.5),
+    axis.title = element_text(size = 12, face = "bold"),
+    axis.text = element_text(size = 10)
+  )
+
+```
 >>>>>>> b1f3b9ac59bc62e413087b0e1f69390986a306f7
