@@ -27,7 +27,7 @@ library(mapSpain)
 
 ```
 
-------------------------------------------------------------------------
+
 
 ### Datos
 
@@ -69,6 +69,11 @@ abbrev_g<-abbrev |>
 
 ```
 
+<<<<<<< Updated upstream
+=======
+
+
+>>>>>>> Stashed changes
 # Hacemos que si un partido tienen asiganda varias abreviaturas se quede con la primera y UNimos elecciones con abreaviaturas, para que en elecciones salga la abrevaitura de cada partido
 
 ```{r}
@@ -141,8 +146,14 @@ resultados_grandes_municipios <- election_tidy_with_siglas |>
   ungroup()  
 ```
 
+<<<<<<< Updated upstream
 # 12.b) ¿Qué partido fue el segundo cuando el primero fue el PSOE? ¿Y cuando el primero fue el PP?
 
+=======
+
+# b) ¿Qué partido fue el segundo cuando el primero fue el PSOE? ¿Y cuando el primero fue el PP?
+`
+>>>>>>> Stashed changes
 ```{r}
 # Obtener los dos primeros partidos por año
 resultados_top2 <- election_tidy_with_siglas |> 
@@ -187,8 +198,13 @@ crecimiento_partido <- function(election_tidy) {
 
 ```
 
+<<<<<<< Updated upstream
 # 12.c) ¿A quién beneficia la baja participación?
 
+=======
+
+# c) ¿A quién beneficia la baja participación?
+>>>>>>> Stashed changes
 ```{r}
 
 election_tidy_with_participation <- election_tidy_with_siglas |> 
@@ -592,6 +608,11 @@ participacion_int
 
 # ¿Cuál es la relación entre la participación electoral y el tamaño de la muestra de las encuestas?
 
+<<<<<<< Updated upstream
+=======
+
+#¿Cuál es la relación entre la participación electoral y el tamaño de la muestra de las encuestas?
+>>>>>>> Stashed changes
 ```{r}
 
 encuestas_filtradas <- surveys_clean_siglas |> 
@@ -668,4 +689,29 @@ ggplot(datos_comparacion, aes(x = fct_reorder(codigo_provincia, -porcentaje_voto
   theme_minimal() +
   theme(axis.text.x = element_text(angle = 90, hjust = 1),
         legend.position = "none")
+```
+
+---------------------------------------------------------------------------
+
+##Pregunta 2: ¿Cuáles son las provincias con mayor y menor cambio en los votos entre 2008 y 2019?
+
+```{r}
+
+
+# Calcular el cambio de votos entre 2008 y 2019 por provincia
+cambio_votos <- election_tidy |> 
+  filter(anno %in% c(2008, 2019)) |> 
+  group_by(codigo_provincia, anno) |> 
+  summarise(total_votos = sum(votos)) |> 
+  spread(anno, total_votos) |> 
+  mutate(cambio_votos = `2019` - `2008`)
+
+# Crear gráfico de puntos para mostrar el cambio de votos por provincia
+ggplot(cambio_votos, aes(x = fct_reorder(codigo_provincia, cambio_votos), y = cambio_votos)) +
+  geom_point(size = 3, color = "blue") +
+  geom_segment(aes(xend = codigo_provincia, yend = 0), color = "red") + # Línea que conecta con el eje 0
+  labs(title = "Cambio de votos entre 2008 y 2019 por provincia",
+       x = "Provincia", y = "Cambio en los votos") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1))  # Mejor visualización de las provincias
 ```
