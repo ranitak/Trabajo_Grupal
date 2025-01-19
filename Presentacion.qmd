@@ -1,0 +1,791 @@
+---
+title: "Entrega grupal"
+author: |
+  Álvaro Pascual (DNI: 01672747-A), Rodrigo Castillo (DNI: 29624141-A),
+  Marcos Martínez (DNI: 50635315-X), Jorge Mendoza (DNI: 51518202-L)
+format:
+  revealjs:
+    theme: sky
+    embed-resources: true
+execute: 
+  echo: true
+---
+
+## Indice 
+
+-   Paquetes Necesarios
+
+-   Bases de Datos 
+
+-   Items Obligatorios 
+
+-   Preguntas Extras
+
+------------------------------------------------------------------------
+
+## Paquetes necesarios
+
+
+```{r}
+rm(list = ls())
+library(tidyverse)
+library(glue)
+library(lubridate)
+library(forcats)
+library(patchwork)
+library(dplyr)
+library(ggplot2)
+library(mapSpain)
+library(plotly)
+```
+
+------------------------------------------------------------------------
+## Datos
+-   `election_data`: archivo con las elecciones al congreso
+-   `cod_mun`: archivo con los códigos y nombres de cada municipio
+-   `abbrev`: siglas de cada partido
+-   `surveys`: encuestas electorales desde 1982.
+```{r}
+election_data <- read_csv(file = "./data/datos_elecciones_brutos.csv")
+cod_mun <- read_csv(file = "./data/cod_mun.csv")
+surveys <- read_csv(file = "./data/historical_surveys.csv")
+abbrev <- read_csv(file = "./data/siglas.csv")
+```
+
+------------------------------------------------------------------------
+# Items Obligatorios
+
+------------------------------------------------------------------------
+
+## 1.  Los datos deben ser convertidos a tidydata donde sea apropiado.
+
+```{r}
+
+```
+
+
+------------------------------------------------------------------------
+## 2.  Debes incluir al menos un join entre tablas.
+```{r}
+
+```
+
+------------------------------------------------------------------------
+## 3.  Recordatorio: información = varianza
+```{r}
+
+```
+
+------------------------------------------------------------------------
+## 4.  Los paquetes `{glue}`, `{forcats}` y `{lubridate}` deben ser utilizados en algún punto
+```{r}
+
+```
+
+------------------------------------------------------------------------
+## 5.  Los siguientes elementos deben usarse al menos una vez: mutate, summarise, group_by (o su equivalente), case_when
+```{r}
+
+```
+
+------------------------------------------------------------------------
+## 6.  Deberéis definir al menos una función (con más de 5 líneas de código)
+```{r}
+
+```
+
+------------------------------------------------------------------------
+
+## 7.  Contamos con muchos partidos que se presentan a las elecciones. Solo nos interesarán los siguientes partidos:
+
+-   PARTIDO SOCIALISTA OBRERO ESPAÑOL 
+-   PARTIDO POPULAR
+-   CIUDADANOS 
+-   PARTIDO NACIONALISTA VASCO
+-   BLOQUE NACIONALISTA GALLEGO
+-   CONVERGÈNCIA I UNIÓ
+-   UNIDAS PODEMOS - IU 
+-   ESQUERRA REPUBLICANA DE CATALUNYA
+-   EH - BILDU 
+-   MÁS PAÍS
+-   VOX
+```{r}
+
+```
+
+------------------------------------------------------------------------
+## 8.  Todo lo que no esté en alguno de los anteriores partidos debe ser correctamente reagrupado (y resumido) en `OTROS`
+```{r}
+
+```
+
+------------------------------------------------------------------------
+## 9.  Las siglas deben ser usadas en las visualizaciones (ideas en <https://r-graph-gallery.com/>).
+```{r}
+
+```
+
+------------------------------------------------------------------------
+## 10. Debes usar todos los archivos en algún momento.
+```{r}
+
+```
+
+------------------------------------------------------------------------
+## 11. Debes descartar las encuestas que:
+-   se refieran a elecciones anteriores a 2008
+-   sean a pie de urna
+-   tamaño muestral desconocido o inferior a 500.
+-   tenga 1 día o menos de trabajo de campo.
+```{r}
+
+```
+
+------------------------------------------------------------------------
+
+## 12. Deberás responder obligatoriamente a las siguientes preguntas (más aquellas que consideres analizar para distinguirte del resto)
+
+-   ¿Qué partido fue el ganador en los municipios con más de 100.000 habitantes (censo) en cada una de las elecciones?
+
+-   ¿Qué partido fue el segundo cuando el primero fue el PSOE? ¿Y cuando el primero fue el PP?
+
+-   ¿A quién beneficia la baja participación?
+
+-   ¿Cómo analizar la relación entre censo y voto? ¿Es cierto que determinados partidos ganan en las zonas rurales?
+```{r}
+
+```
+
+
+------------------------------------------------------------------------
+## 13. ¿Cómo calibrar el error de las encuestas (recordemos que las encuestas son de intención de voto a nivel nacional)?
+```{r}
+
+```
+
+------------------------------------------------------------------------
+## 14.  ¿Qué casas encuestadoras acertaron más y cuáles se desviaron más de los resultados?
+```{r}
+
+```
+
+------------------------------------------------------------------------
+
+## Evaluación
+
+No se valorará más a quien haga más cosas.
+
+Más no siempre es mejor
+
+Se valorará la originalidad (en comparación con el resto de trabajos, ya sea en lo analizado, en el tema tratado, etc.), el cariño puesto en la entrega (el cariño en la vida es importante) y la relevancia de lo realizado.
+
+------------------------------------------------------------------------
+
+## Evaluación 2
+
+Una vez que tengas los elementos obligatorios de tu base de datos más o menos completos, piensa antes de escribir código: ¿qué podría ser interesante? ¿Qué necesito para obtener un resumen tanto numérico como visual?
+
+Recuerda que el objetivo real es demostrar un dominio de las herramientas vistas a lo largo del curso. Y eso no se mide solo por la cantidad de herramientas utilizadas, sino también por la calidad en su ejecución.
+
+Deberéis tenerlo todo subido a Github con el enlace generado de manera correcta.
+
+(election_tidy\$anno)
+
+```{r}
+# Pasamos la tabla de elecciones a tidy, hacemos una columna partido
+election_tidy <- election_data |> 
+  pivot_longer(cols = -c(tipo_eleccion:votos_candidaturas), names_to = "Partido", values_to = "votos") |> drop_na("votos")
+
+
+
+
+
+# Agrupar varios partidos a la misma sigla
+abbrev_g<-abbrev |> 
+  mutate(siglas=case_when(
+    str_detect(denominacion, "PARTIDO SOCIALISTA|PSOE") ~ "PSOE",
+    str_detect(denominacion, "PARTIDO POPULAR") ~ "PP",
+    str_detect(denominacion, "CIUDADANOS-PARTIDO DE LA CIUDADANÍA|CIUDADANOS-PARTIDO DE LA CIUDADANIA") ~ "C's",
+    str_detect(denominacion, "PARTIDO NACIONALISTA VASCO") ~ "PNV",
+    str_detect(denominacion, "BLOQUE NACIONALISTA GALEGO") ~ "BNG",
+    str_detect(denominacion, "CONVERGENCIA i UNIO|CONVERGENCIA I UNIO") ~ "CIU",
+    str_detect(denominacion, "UNIDAS PODEMOS|PODEM|EZKER BATUA|IZQUIERDA UNIDA") ~ "UP",
+    str_detect(denominacion, "ESQUERRA REPUBLICANA DE CATALUNYA") ~ "ERC",
+    str_detect(denominacion, "SORTU|EUSKO|ALkARTASUNA|ARALAR|ALTERNATIBA") ~ "EH-BILDU",
+    str_detect(denominacion, "MÁS PAÍS") ~ "MP",
+    str_detect(denominacion, "VOX") ~ "VOX",
+    TRUE ~ "OTROS",
+  ))
+
+
+# Hacemos que si un partido tienen asiganda varias abreviaturas se quede con la primera
+siglas_unique <- abbrev_g |> 
+  distinct(denominacion, .keep_all = TRUE)
+
+# UNimos elecciones con abreaviaturas, para que en elecciones salga la abrevaitura de cada partido
+election_tidy_with_siglas <- election_tidy |> 
+  left_join(siglas_unique, 
+            by = c("Partido" = "denominacion"))
+
+
+# Separamos cod_mun en las 3 varibales de comunidad autonoma, provincia y municipio, para que coincidan con las de la tabla elecciones
+cod_mun <- cod_mun |> 
+  separate(cod_mun, 
+           into = c("codigo_ccaa", "codigo_provincia", "codigo_municipio"), 
+           sep = "-")
+
+
+# En la tabla surveys (encuestas) hacemos una columna partido, muy simliar al primero de elecciones, además quitamos los partidos que no tienen importancia en la encuesta, es decir q ue no han recibido datos
+surveys_tidy <- surveys |> 
+  pivot_longer(cols = -c(type_survey:turnout), names_to = "Partido", values_to = "value") |> 
+  filter(year(date_elec) >= 2008 & year(date_elec) <= 2019) |> 
+  drop_na("value")
+
+
+
+# Debes descartar las encuestas que:
+# se refieran a elecciones anteriores a 2008
+# sean a pie de urna
+# tamaño muestral desconocido o inferior a 500.
+# tenga 1 día o menos de trabajo de campo.
+
+
+# Convertir las columnas de fecha a formato Date
+surveys_clean <- surveys_tidy |> 
+  mutate(
+    date_elec = ymd(date_elec),
+    field_date_from = ymd(field_date_from),
+    field_date_to = ymd(field_date_to),
+    field_duration = as.numeric(field_date_to - field_date_from)
+  )
+
+# Filtrar la base de datos según las condiciones
+surveys_clean <- surveys_clean |> 
+  filter(
+    date_elec >= "2008-01-01",         
+    exit_poll == FALSE,                
+    !is.na(size) & size >= 500,        
+    field_duration > 1                 
+  )
+
+
+
+# 12:
+# a) ¿Qué partido fue el ganador en los municipios con más de 100.000 habitantes (censo) en cada una de las elecciones?
+
+
+resultados_grandes_municipios <- election_tidy_with_siglas |> 
+  filter(censo > 100000) |> 
+  group_by(anno, Partido) |> 
+  summarise(
+    total_votos = sum(votos, na.rm = TRUE),
+    .groups = "drop"  
+  ) |> 
+  group_by(anno) |> 
+  slice_max(order_by = total_votos, n = 1) |> 
+  ungroup()  
+
+# b) ¿Qué partido fue el segundo cuando el primero fue el PSOE? ¿Y cuando el primero fue el PP?
+
+# Obtener los dos primeros partidos por año
+resultados_top2 <- election_tidy_with_siglas |> 
+  filter(censo > 100000) |> 
+  group_by(anno, Partido) |> 
+  summarise(
+    total_votos = sum(votos, na.rm = TRUE),
+    .groups = "drop"
+  ) |> 
+  group_by(anno) |> 
+  slice_max(order_by = total_votos, n = 2) |> 
+  arrange(anno, desc(total_votos)) |> 
+  mutate(posicion = row_number()) |> 
+  pivot_wider(
+    names_from = posicion,
+    values_from = c(Partido, total_votos)
+  )
+
+
+
+
+crecimiento_partido <- function(election_tidy) {
+  # Calcular los votos totales por partido y año
+  votos_agrupados <- election_tidy |> 
+    group_by(anno, Partido) |> 
+    summarise(total_votos = sum(votos, na.rm = TRUE), .groups = "drop")
+  
+  # Ordenar los datos por partido y año
+  votos_ordenados <- votos_agrupados |> 
+    arrange(Partido, anno)
+  
+  # Calcular el crecimiento o disminución porcentual entre elecciones consecutivas
+  # Usamos lag() para obtener los votos del año anterior
+  # En las elecciones en las que un determinado partido aparece por primera vez, el cambio
+  # porcentual es 0
+  crecimiento <- votos_ordenados |> 
+    group_by(Partido) |> 
+    mutate(cambio_pct = ifelse(is.na(lag(total_votos)), 0, (total_votos - lag(total_votos)) / lag(total_votos) * 100)) |> 
+    ungroup()
+  
+  return(crecimiento)
+}
+
+
+
+# ¿Cómo calibrar el error de las encuestas (recordemos que las encuestas son de intención de voto a nivel nacional)?
+
+# Agrupar varios partidos a la misma sigla
+surveys_clean_siglas <- surveys_clean |> 
+  mutate(Partido=case_when(
+    str_detect(Partido, "PSOE") ~ "PSOE",
+    str_detect(Partido, "PP") ~ "PP",
+    str_detect(Partido, "C's") ~ "C's",
+    str_detect(Partido, "PNV") ~ "PNV",
+    str_detect(Partido, "BNGO") ~ "BNG",
+    str_detect(Partido, "CIU") ~ "CIU",
+    str_detect(Partido, "UP") ~ "UP",
+    str_detect(Partido, "ERC") ~ "ERC",
+    str_detect(Partido, "EH-BILDU") ~ "EH-BILDU",
+    str_detect(Partido, "MP") ~ "MP",
+    str_detect(Partido, "VOX") ~ "VOX",
+    TRUE ~ "OTROS",
+  ))
+# Calcular el porcentaje de votos por partido en las elecciones
+votes_percentage <- election_tidy_with_siglas |> 
+  group_by(anno, siglas) |> 
+  summarise(total_votes = sum(votos, na.rm = TRUE), .groups = "drop_last") |> 
+  mutate(percentage_votes = total_votes / sum(total_votes) * 100) |> 
+  ungroup()
+
+# Calcular el porcentaje de intención de voto por partido en las encuestas
+survey_percentage <- surveys_clean_siglas |> 
+  mutate(date_elec = year(date_elec)) |> 
+  group_by(date_elec, Partido) |> 
+  summarise(mean_intention = mean(value, na.rm = TRUE), .groups = "drop_last") |> 
+  mutate(percentage_intention = mean_intention / sum(mean_intention) * 100) |> 
+  ungroup()
+
+# Unir ambas tablas y calcular el error
+error_calibration <- votes_percentage |> 
+  inner_join(survey_percentage, by = c("anno" = "date_elec", "siglas" = "Partido")) |>
+  mutate(error = abs(percentage_votes - percentage_intention))
+
+
+
+
+# ¿Qué casas encuestadoras acertaron más y cuáles se desviaron más de los resultados?
+# Calcular el porcentaje de error por casa encuestadora
+media_errors <- surveys_clean_siglas |> 
+  mutate(anno = year(date_elec)) |> 
+  group_by(anno, Partido, media) |> 
+  summarise(
+    mean_intention = mean(value, na.rm = TRUE),
+    .groups = "drop"
+  ) |> 
+  mutate(percentage_intention = mean_intention / sum(mean_intention) * 100) |> 
+  inner_join(votes_percentage, by = c("anno", "Partido" = "siglas")) |> 
+  mutate(error = abs(percentage_votes - percentage_intention))
+
+# Calcular el error promedio por casa encuestadora
+accuracy_by_media <- media_errors |> 
+  group_by(media) |> 
+  summarise(
+    mean_error = mean(error, na.rm = TRUE),
+    .groups = "drop"
+  ) |> 
+  arrange(mean_error)
+
+# Identificar las casas encuestadoras más acertadas y más desviadas
+medios_mas_acertados <- accuracy_by_media |> slice_min(order_by = mean_error, n = 5)
+medios_menos_acertados <- accuracy_by_media |> slice_max(order_by = mean_error, n = 5)
+
+```
+
+Medio
+
+```{r}
+#Mendoza
+
+#Relación entre el censo y el voto mediante un mapa:
+
+library(patchwork)
+
+
+indice <- election_data|>
+  filter(anno==2019) |> 
+  mutate("key"=glue("{codigo_provincia}-{codigo_municipio}")) |> 
+  drop_na(votos_candidaturas, censo) |> 
+   mutate("indice" = votos_candidaturas / censo) 
+
+mapa<-mapSpain::esp_get_munic() |> 
+     mutate("key"=glue("{cpro}-{cmun}"))
+  
+mapa_indice<- mapa |> 
+  left_join(indice, by="key")
+
+#Grafico de la participacion
+
+g_ind<-ggplot(mapa_indice)+
+  geom_sf(aes(alpha=indice, fill=indice), color=NA)+
+  scale_alpha_continuous(range = c(0.7,0.9))+
+  scale_fill_gradient2(low = "#b9feff",mid="#00c9ff", high = "#040b64", midpoint =
+mean(indice$indice), labels = scales::label_number(scale = 100, suffix="%"))+
+  labs(fill="PARTICIPACION",
+       title = "PARTICIPACION 2019")+
+  theme_minimal()+
+      theme(
+    axis.text = element_blank(),  # Eliminar etiquetas de los ejes
+    axis.ticks = element_blank(),  # Eliminar marcas de los ejes
+    legend.position = "bottom",  # Colocar la leyenda abajo
+    legend.title = element_text(face = "bold", size = 12),  # Estilo de título de la leyenda
+    legend.text = element_text(size = 8, angle = 30),  # Estilo de texto de la leyenda
+    strip.text = element_text(face = "bold", size = 12),  # Estilo de los títulos de las facetas
+    plot.title = element_text(face = "bold", size = 12, hjust = 0.5),  # Estilo del título
+    plot.subtitle = element_text(size = 12, hjust = 0.5) # Estilo del subtítulo
+    )+
+    guides(alpha = "none")
+  
+
+
+#Grafico del censo de España
+g_cen<-ggplot(mapa_indice)+
+  geom_sf(aes(alpha=censo, fill=censo), color=NA)+
+  scale_alpha_continuous(range = c(0.7,0.9))+
+  scale_fill_gradient2(low = "#b9feff",mid="#00c9ff", high = "#040b64", midpoint =
+mean(election_data$censo), transform = "log",labels = scales::label_number(scale = 1, accuracy = 1))+
+  labs(title = "CENSO EN 2019")+
+  theme_minimal()+
+      theme(
+    axis.text = element_blank(),  # Eliminar etiquetas de los ejes
+    axis.ticks = element_blank(),  # Eliminar marcas de los ejes
+    legend.position = "bottom",  # Colocar la leyenda abajo
+    legend.title = element_text(face = "bold", size = 12),  # Estilo de título de la leyenda
+    legend.text = element_text(size = 8, angle = 30),  # Estilo de texto de la leyenda
+    strip.text = element_text(face = "bold", size = 12),  # Estilo de los títulos de las facetas
+    plot.title = element_text(face = "bold", size = 12, hjust = 0.5),  # Estilo del título
+    plot.subtitle = element_text(size = 12, hjust = 0.5) # Estilo del subtítulo
+    )+
+    guides(alpha = "none")
+
+
+votos_censo<-g_ind+g_cen   #Sumamos las graficas para compararlas
+print(votos_censo)  
+
+
+colores_partidos <- c(
+  "PSOE" = "#E30000",     
+  "PP" = "#0000FF",       
+  "C's" = "#FF6600",      
+  "PNV" = "#006747",      
+  "BNG" = "#0C6F6D",      
+  "CIU" = "#9C3D28",    
+  "UP" = "#6A0DAD",     
+  "ERC" = "#E24D3A",      
+  "EH-BILDU" = "#006F6F", 
+  "MP" = "#00CFFF",       
+  "VOX" = "#008000",      
+  "OTROS" = "#BEBEBE"     
+)
+
+ganadores_mun<-election_tidy_with_siglas |> 
+  filter(anno==2019) |> 
+  mutate("key"=glue("{codigo_provincia}-{codigo_municipio}")) |> 
+  group_by(key) |> 
+  drop_na(votos) |> 
+  slice_max(votos)
+
+  
+ganadores_mun<-  ganadores_mun|>
+  mutate("Tipo_mun"= if_else(censo>median(ganadores_mun$censo),"Urbana","Rural"))
+
+ganadores <-ggplot(ganadores_mun)+
+  geom_bar(aes(x = siglas, fill = siglas))+
+  scale_fill_manual(values = colores_partidos)+
+  facet_wrap(~Tipo_mun)+
+    labs(title = "GANADORES RURALES Y URBANOS 2019", 
+         x= "PARTIDOS",
+         y= "VICTORIAS")+
+  theme_minimal()+
+      theme(
+    legend.position = "none",  # Quitar la leyenda
+    strip.text = element_text(face = "bold", size = 12),  # Estilo de los títulos de las facetas
+    plot.title = element_text(face = "bold", size = 12, hjust = 0.5),  # Estilo del título
+    plot.subtitle = element_text(size = 12, hjust = 0.5), # Estilo del subtítulo
+    axis.text = element_text(size = 10, angle = 30)
+    )+
+    guides(alpha = "none")
+
+ganadores_interactivo <- ggplotly(ganadores)
+
+print(ganadores_interactivo)
+```
+
+
+
+```{r}
+# RODRI
+# Pregunta 12 
+# c) ¿A quién beneficia la baja participación?
+
+
+election_tidy_with_participation <- election_tidy_with_siglas |> 
+  mutate(participacion = votos / censo)
+
+participacion_partido <- election_tidy_with_participation |> 
+  group_by(anno, siglas) |> 
+  summarise(
+    participacion_media = mean(participacion, na.rm = TRUE),
+    votos_totales = sum(votos, na.rm = TRUE),
+    .groups = "drop"
+  )
+
+resultados_con_participacion <- participacion_partido |> 
+  mutate(resultado_votos = votos_totales / sum(votos_totales) * 100)
+
+
+
+# Crear la gráfica de dispersión con los colores definidos y mejor estética
+resultados <- ggplot(resultados_con_participacion, aes(x = participacion_media, y = resultado_votos, color = siglas)) + 
+  geom_point(size = 3, alpha = 0.7) +  # Puntos con tamaño ajustado y transparencia
+  geom_smooth(method = "lm", se = FALSE, aes(group = siglas), color = "black", linetype = "dashed") + # Línea de regresión por partido
+  facet_wrap(~ anno, scales = "free_y") + # Facetas por año
+  scale_color_manual(values = colores_partidos) + # Usar los colores definidos
+  labs(
+    title = "Relación entre Participación y Resultados Electorales por Año", 
+    subtitle = "Cada punto representa un partido en una elección, con la participación y el porcentaje de votos",
+    x = "Participación Media (%)",
+    y = "Porcentaje de Votos (%)",
+    color = "Partido"
+  ) +
+  theme_minimal(base_size = 14) +  # Estilo minimalista y tamaño de texto ajustado
+  theme(
+    legend.position = "bottom",  # Colocar la leyenda abajo
+    legend.title = element_text(face = "bold", size = 12),  # Estilo de título de la leyenda
+    legend.text = element_text(size = 10),  # Estilo de texto de la leyenda
+    strip.text = element_text(face = "bold", size = 12),  # Estilo de los títulos de las facetas
+    plot.title = element_text(face = "bold", size = 16, hjust = 0.5),  # Estilo del título
+    plot.subtitle = element_text(size = 12, hjust = 0.5) # Estilo del subtítulo
+    )
+
+resultados_interactivo <- ggplotly(resultados)
+resultados_interactivo
+```
+
+```{r}
+
+## Ejercicios extras Marcos: 
+
+
+# ¿Qué 10 partidos obtuvieron mejores resultados en comparación con las predicciones de las encuestas?
+
+comparativa_partidos <- surveys_clean_siglas |> 
+  mutate(anno = year(date_elec)) |> 
+  group_by(anno, Partido) |> 
+  summarise(
+    mean_intention = mean(value, na.rm = TRUE),
+    .groups = "drop"
+  ) |> 
+  mutate(percentage_intention = mean_intention / sum(mean_intention) * 100) |> 
+  inner_join(votes_percentage, by = c("anno", "Partido" = "siglas")) |> 
+  mutate(diferencia = percentage_votes - percentage_intention) |> 
+  arrange(desc(diferencia)) |> 
+  slice_max(order_by = diferencia, n = 10)
+
+# ¿Cuál es la relación entre el tamaño del censo y la fragmentación del voto (índice de Herfindahl)? Representar los valores de fragmentación en un mapa por comunidades autonomas.
+
+library(mapSpain)
+library(ggplot2)
+library(dplyr)
+
+
+election_tidy_with_siglas <- election_tidy_with_siglas |> 
+  mutate(codigo_ccaa = substr(codigo_ccaa, 1, 2))  
+
+
+fragmentacion_ccaa <- election_tidy_with_siglas |> 
+  group_by(codigo_ccaa, Partido) |> 
+  summarise(votos_totales = sum(votos, na.rm = TRUE), censo_total = sum(censo, na.rm = TRUE), .groups = "drop") |> 
+  group_by(codigo_ccaa) |> 
+  reframe(
+    indice_herfindahl = sum((votos_totales / sum(votos_totales, na.rm = TRUE))^2, na.rm = TRUE),
+    censo_total = unique(censo_total)  
+  )
+
+
+mapa_ccaa <- mapSpain::esp_get_ccaa()
+
+mapa_fragmentacion_ccaa <- mapa_ccaa |> 
+  left_join(fragmentacion_ccaa, by = c("codauto" = "codigo_ccaa"))
+
+ggplot(mapa_fragmentacion_ccaa) +
+  geom_sf(aes(fill = indice_herfindahl), color = "gray90", size = 0.1) +
+  geom_sf_text(
+    data = mapa_fragmentacion_ccaa |>  filter(!is.na(indice_herfindahl)),
+    aes(label = sprintf("%.2f", indice_herfindahl)),
+    size = 2,
+    color = "black",
+    fontface = "bold"
+  ) +
+  scale_fill_gradientn(
+    colors = c("lightcoral", "gold", "forestgreen"),
+    name = "Fragmentación",
+    limits = c(0, 1),
+    labels = scales::percent_format(accuracy = 1)
+  ) +
+  labs(
+    title = "Fragmentación del Voto por Comunidades Autonomas en España",
+    subtitle = "Índice de Herfindahl",
+    fill = "Fragmentación (Herfindahl)"
+  ) +
+  coord_sf(datum = NA) + 
+  theme_minimal() +
+  theme(
+    plot.title = element_text(hjust = 0.5, size = 14, face = "bold"),
+    plot.subtitle = element_text(hjust = 0.5, size = 12),
+    legend.position = "right",
+    legend.title = element_text(size = 10),
+    legend.text = element_text(size = 8),
+    panel.grid = element_blank()
+  )
+```
+
+```{r}
+# Rodri
+crecimiento_partido <- function(election_tidy) {
+  # Calcular los votos totales por partido y año
+  votos_agrupados <- election_tidy |> 
+    group_by(anno, Partido) |> 
+    summarise(total_votos = sum(votos, na.rm = TRUE), .groups = "drop")
+  
+  # Ordenar los datos por partido y año
+  votos_ordenados <- votos_agrupados |> 
+    arrange(Partido, anno)
+  
+  # Calcular el crecimiento o disminución porcentual entre elecciones consecutivas
+  # Usamos lag() para obtener los votos del año anterior
+  # En las elecciones en las que un determinado partido aparece por primera vez, el cambio
+  # porcentual es 0
+  crecimiento <- votos_ordenados |> 
+    group_by(Partido) |> 
+    mutate(cambio_pct = ifelse(is.na(lag(total_votos)), 0, (total_votos - lag(total_votos)) / lag(total_votos) * 100)) |> 
+    ungroup()
+  
+  return(crecimiento)
+}
+```
+
+
+```{r}
+# Ejercicios extra Rodrigo:
+
+# 1 ¿Qué comunidad autónoma tiene la mayor participación electoral promedio en las elecciones entre 2008 y 2019?
+
+
+codigo_a_comunidad <- c(
+  "14" = "País Vasco",
+  "07" = "Castilla La Mancha",
+  "17" = "Comunidad Valenciana",
+  "01" = "Andalucía",
+  "08" = "Castilla y León",
+  "10" = "Extremadura",
+  "04" = "Islas Baleares",
+  "09" = "Cataluña",
+  "11" = "Galicia",
+  "02" = "Aragón",
+  "16" = "La Rioja",
+  "12" = "Madrid",
+  "15" = "Murcia",
+  "13" = "Navarra",
+  "03" = "Asturias",
+  "05" = "Canarias",
+  "06" = "Cantabria",
+  "18" = "Ceuta",
+  "19" = "Melilla"
+)
+
+
+participacion_media_ccaa <- election_tidy_with_siglas |> 
+  group_by(codigo_ccaa) |> 
+  summarise(
+    participacion_promedio = mean(votos_candidaturas, na.rm = TRUE) / mean(censo, na.rm = TRUE) * 100
+  ) 
+
+
+participacion_media_ccaa <- participacion_media_ccaa |> 
+  mutate(nombre_ccaa = codigo_a_comunidad[as.character(codigo_ccaa)])
+
+
+
+participacion <- ggplot(participacion_media_ccaa, aes(x = reorder(nombre_ccaa, -participacion_promedio), y = participacion_promedio, fill = nombre_ccaa)) +
+  geom_bar(stat = "identity", show.legend = FALSE, width = 0.8) +
+  geom_text(aes(label = round(participacion_promedio, 2)), 
+            vjust = -0.3,  
+            color = "black", size = 3, fontface = "bold") +
+  scale_fill_viridis_d(option = "D", begin = 0.2, end = 0.8) +  
+  scale_y_continuous(limits = c(0, 100)) + 
+  labs(
+    title = "Comunidad Autónoma con Mayor Participación Electoral Promedio (2008-2019)",
+    subtitle = "Participación promedio en las elecciones durante el período 2008-2019",
+    x = "Comunidad Autónoma",
+    y = "Participación Promedio (%)"
+  ) +
+  theme_minimal(base_size = 15) +
+  theme(
+    axis.text.x = element_text(angle = 45, hjust = 1, size = 13, family = "Arial", color = "darkblue"),
+    axis.text.y = element_text(size = 13, family = "Arial", color = "darkblue"),
+    axis.title.x = element_text(size = 14, face = "bold", family = "Arial", color = "darkred"),
+    axis.title.y = element_text(size = 14, face = "bold", family = "Arial", color = "darkred"),
+    plot.title = element_text(size = 11, face = "bold", family = "Arial", color = "darkgreen"),
+    plot.subtitle = element_text(size = 12, family = "Arial", color = "gray50"),
+    plot.margin = margin(10, 20, 10, 20),
+    panel.grid.major = element_line(color = "gray85", size = 0.5),
+    panel.grid.minor = element_blank(),
+    panel.background = element_rect(fill = "white", color = "white"))
+
+participacion_int <- ggplotly(participacion)
+participacion_int
+
+
+# 2 ¿Cuál es la relación entre la participación electoral y el tamaño de la muestra de las encuestas?
+encuestas_filtradas <- surveys_clean_siglas |> 
+  filter(size >= 500)
+
+participacion_por_partido <- encuestas_filtradas |> 
+  group_by(Partido) |> 
+  summarise(mean_participacion = mean(value, na.rm = TRUE))
+
+partidos_colores <- c(
+  "PSOE" = "#D50032",  
+  "PP" = "#0056A0",    
+  "C's" = "#FF6600",   
+  "VOX" = "#006747",   
+  "UP" = "#9B4F96",     
+  "ERC" = "#D82B6D",    
+  "PNV" = "#006A3E",    
+  "MP" = "#03A9F4",     
+  "EH-BILDU" = "#E32B5F",
+  "CIU" = "#A7C3A4",    
+  "BNG" = "#E60012",    
+  "Otros" = "#BDBDBD"    
+)
+
+encuestas <- ggplot(participacion_por_partido, aes(x = reorder(Partido, -mean_participacion), y = mean_participacion, fill = Partido)) +
+  geom_bar(stat = "identity", width = 0.7) +  
+  scale_fill_manual(values = partidos_colores) +  
+  labs(title = "Participación Electoral Promedio por Partido (Tamaño de Muestra > 500)",
+       x = "Partido", y = "Participación Electoral Promedio (%)") +
+  theme_minimal(base_size = 14) +  
+  theme(
+    axis.text.x = element_text(angle = 45, hjust = 1, size = 12),  
+    axis.text.y = element_text(size = 12),  
+    plot.title = element_text(size = 12, face = "bold", hjust = 0.5),  
+    legend.position = "none",  
+    panel.grid.major.x = element_blank(),  
+    panel.grid.minor.x = element_blank()   
+  ) +
+  coord_flip()
+
+encuestas_int <- ggplotly(encuestas)
+encuestas_int
+```
+
+
