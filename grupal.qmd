@@ -705,7 +705,6 @@ crecimiento_partido <- function(election_tidy) {
 }
 ```
 
-
 ```{r}
 # Ejercicios extra Rodrigo:
 
@@ -817,5 +816,3 @@ encuestas <- ggplot(participacion_por_partido, aes(x = reorder(Partido, -mean_pa
 encuestas_int <- ggplotly(encuestas)
 encuestas_int
 ```
-
-
