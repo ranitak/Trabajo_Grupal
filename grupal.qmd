@@ -743,6 +743,7 @@ participacion_media_ccaa <- participacion_media_ccaa |>
   mutate(nombre_ccaa = codigo_a_comunidad[as.character(codigo_ccaa)])
 
 
+
 ggplot(participacion_media_ccaa, aes(x = reorder(nombre_ccaa, -participacion_promedio), y = participacion_promedio, fill = nombre_ccaa)) +
   geom_bar(stat = "identity", show.legend = FALSE, width = 0.8) +
   geom_text(aes(label = round(participacion_promedio, 2)), 
