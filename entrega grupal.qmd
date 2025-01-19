@@ -31,8 +31,6 @@ library(mapSpain)
 
 ### Datos
 
-Un viejo amigo: la práctica se basará en los [**archivos de datos electorales**]{.hl-yellow} que se indican a continuación, recopilando datos sobre las elecciones al Congreso de los Diputados en España desde 2008 hasta la actualidad, así como encuestas, códigos de municipios y abreviaturas
-
 ```{r}
 election_data <- read_csv(file = "./data/datos_elecciones_brutos.csv")
 cod_mun <- read_csv(file = "./data/cod_mun.csv")
@@ -40,7 +38,8 @@ surveys <- read_csv(file = "./data/historical_surveys.csv")
 abbrev <- read_csv(file = "./data/siglas.csv")
 ```
 
-Pasamos la tabla de elecciones a tidy, hacemos una columna partido
+
+# Pasamos la tabla de elecciones a tidy, hacemos una columna partido
 
 ```{r}
 
@@ -50,7 +49,7 @@ election_tidy <- election_data |>
 
 ```
 
-Agrupar varios partidos a la misma sigla
+# Agrupar varios partidos a la misma sigla
 
 ```{r}
 abbrev_g<-abbrev |> 
@@ -71,9 +70,11 @@ abbrev_g<-abbrev |>
 
 ```
 
-------------------------------------------------------------------------
 
-Hacemos que si un partido tienen asiganda varias abreviaturas se quede con la primera y UNimos elecciones con abreaviaturas, para que en elecciones salga la abrevaitura de cada partido
+
+# Hacemos que si un partido tienen asiganda varias abreviaturas se quede con la 
+primera y UNimos elecciones con abreaviaturas, para que en elecciones salga la 
+abrevaitura de cada partido
 
 ```{r}
 siglas_unique <- abbrev_g |> 
@@ -85,7 +86,8 @@ election_tidy_with_siglas <- election_tidy |>
 
 ```
 
-Separamos cod_mun en las 3 varibales de comunidad autonoma, provincia y municipio, para que coincidan con las de la tabla elecciones
+# Separamos cod_mun en las 3 varibales de comunidad autonoma, provincia y 
+municipio, para que coincidan con las de la tabla elecciones
 
 ```{r}
 
@@ -95,7 +97,10 @@ cod_mun <- cod_mun |>
            sep = "-")
 ```
 
-En la tabla surveys (encuestas) hacemos una columna partido, muy simliar al primero de elecciones, además quitamos los partidos que no tienen importancia en la encuesta, es decir que no han recibido datos
+
+# En la tabla surveys (encuestas) hacemos una columna partido, muy simliar al 
+primero de elecciones, además quitamos los partidos que no tienen importancia 
+en la encuesta, es decir que no han recibido datos
 
 ```{r}
 
@@ -107,7 +112,9 @@ surveys_tidy <- surveys |>
 
 ```
 
-Debes descartar las encuestas que: se refieran a elecciones anteriores a 2008, sean a pie de urna, tamaño muestral desconocido o inferior a 500, tenga 1 día o menos de trabajo de campo.
+# Debes descartar las encuestas que: se refieran a elecciones anteriores a 2008,
+sean a pie de urna, tamaño muestral desconocido o inferior a 500, tenga 1 día o
+menos de trabajo de campo.
 
 ```{r}
 # Convertir las columnas de fecha a formato Date
@@ -130,7 +137,10 @@ surveys_clean <- surveys_clean |>
 
 ```
 
-12.a) ¿Qué partido fue el ganador en los municipios con más de 100.000 habitantes (censo) en cada una de las elecciones?
+ 
+
+# 12.a) ¿Qué partido fue el ganador en los municipios con más de 100.000 
+habitantes (censo) en cada una de las elecciones?
 
 ```{r}
 resultados_grandes_municipios <- election_tidy_with_siglas |> 
@@ -145,9 +155,10 @@ resultados_grandes_municipios <- election_tidy_with_siglas |>
   ungroup()  
 ```
 
-------------------------------------------------------------------------
 
-12.b) ¿Qué partido fue el segundo cuando el primero fue el PSOE? ¿Y cuando el primero fue el PP?
+
+# 12.b) ¿Qué partido fue el segundo cuando el primero fue el PSOE? 
+¿Y cuando el primero fue el PP?
 
 ```{r}
 # Obtener los dos primeros partidos por año
@@ -193,7 +204,8 @@ crecimiento_partido <- function(election_tidy) {
 
 ```
 
-c\) ¿A quién beneficia la baja participación?
+
+# 12.c) ¿A quién beneficia la baja participación?
 
 ```{r}
 
@@ -256,7 +268,9 @@ resultados_interactivo
 
 ```
 
-¿Cómo calibrar el error de las encuestas (recordemos que las encuestas son de intención de voto a nivel nacional)?
+
+# 12.d)¿Cómo calibrar el error de las encuestas (recordemos que las encuestas 
+son de intención de voto a nivel nacional)?
 
 ```{r}
 # Agrupar varios partidos a la misma sigla
@@ -296,7 +310,9 @@ error_calibration <- votes_percentage |>
   mutate(error = abs(percentage_votes - percentage_intention))
 ```
 
-¿Qué casas encuestadoras acertaron más y cuáles se desviaron más de los resultados?
+
+# ¿Qué casas encuestadoras acertaron más y cuáles se desviaron más de 
+los resultados?
 
 ```{r}
 # Calcular el porcentaje de error por casa encuestadora
@@ -327,7 +343,8 @@ medios_menos_acertados <- accuracy_by_media |> slice_max(order_by = mean_error, 
 
 ```
 
-12.d) Relación entre el censo y el voto mediante un mapa:
+
+# 12.d) Relación entre el censo y el voto mediante un mapa:
 
 ```{r}
 
@@ -426,9 +443,10 @@ ggplot(ganadores_mun)+
 
 ```
 
-## Ejercicios extras
+#Ejercicios extras
 
-¿Qué 10 partidos obtuvieron mejores resultados en comparación con las predicciones de las encuestas?
+¿Qué 10 partidos obtuvieron mejores resultados en comparación con las 
+predicciones de las encuestas?
 
 ```{r}
 
@@ -447,7 +465,9 @@ comparativa_partidos <- surveys_clean_siglas |>
   slice_max(order_by = diferencia, n = 10)
 ```
 
-¿Cuál es la relación entre el tamaño del censo y la fragmentación del voto (índice de Herfindahl)? Representar los valores de fragmentación en un mapa por comunidades autonomas.
+# ¿Cuál es la relación entre el tamaño del censo y la fragmentación del voto 
+(índice de Herfindahl)? Representar los valores de fragmentación en un mapa 
+por comunidades autonomas.
 
 ```{r}
 
@@ -503,10 +523,9 @@ ggplot(mapa_fragmentacion_ccaa) +
   )
 ```
 
-Funcion para calcular la evolucion de votos de un partido
+# Funcion para calcular la evolucion de votos de un partido
 
 ```{r}
-# Rodri
 crecimiento_partido <- function(election_tidy) {
   # Calcular los votos totales por partido y año
   votos_agrupados <- election_tidy |> 
@@ -530,9 +549,9 @@ crecimiento_partido <- function(election_tidy) {
 }
 ```
 
-## Ejercicios extra 
 
-¿Qué comunidad autónoma tiene la mayor participación electoral promedio en las elecciones entre 2008 y 2019?
+# ¿Qué comunidad autónoma tiene la mayor participación electoral promedio en las
+elecciones entre 2008 y 2019?
 
 ```{r}
 
@@ -599,9 +618,10 @@ participacion_int
 
 ```
 
-------------------------------------------------------------------------
 
-¿Cuál es la relación entre la participación electoral y el tamaño de la muestra de las encuestas?
+
+# ¿Cuál es la relación entre la participación electoral y el tamaño de la
+muestra de las encuestas?
 
 ```{r}
 
