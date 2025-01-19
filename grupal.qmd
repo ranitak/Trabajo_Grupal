@@ -703,6 +703,7 @@ crecimiento_partido <- function(election_tidy) {
 
 
 ```{r}
+<<<<<<< Updated upstream
 # Ejercicios extra Rodrigo:
 
 # 1 ¿Qué comunidad autónoma tiene la mayor participación electoral promedio en las elecciones entre 2008 y 2019?
