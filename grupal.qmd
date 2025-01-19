@@ -4,7 +4,7 @@ author: "Álvaro Pascual (DNI: 01672747-A), Rodrigo Castillo (DNI: 29624141-A),
          Marcos Martínez (DNI: 50635315-X), Jorge Mendoza (DNI: 51518202-L)"
 format:
   revealjs:
-    theme: [style.scss]
+    theme: sky
     embed-resources: true
 execute: 
   echo: true
