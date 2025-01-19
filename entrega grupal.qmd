@@ -28,7 +28,6 @@ library(patchwork)
 
 ------------------------------------------------------------------------
 
-
 ### Datos
 
 Un viejo amigo: la práctica se basará en los [**archivos de datos electorales**]{.hl-yellow} que se indican a continuación, recopilando datos sobre las elecciones al Congreso de los Diputados en España desde 2008 hasta la actualidad, así como encuestas, códigos de municipios y abreviaturas
@@ -40,9 +39,8 @@ surveys <- read_csv(file = "./data/historical_surveys.csv")
 abbrev <- read_csv(file = "./data/siglas.csv")
 ```
 
-
-
 ## Pasamos la tabla de elecciones a tidy, hacemos una columna partido
+
 ```{r}
 
 election_tidy <- election_data |> 
@@ -51,8 +49,8 @@ election_tidy <- election_data |>
 
 ```
 
-
 ## Agrupar varios partidos a la misma sigla
+
 ```{r}
 abbrev_g<-abbrev |> 
   mutate(siglas=case_when(
@@ -72,9 +70,10 @@ abbrev_g<-abbrev |>
 
 ```
 
---------------------------------------------------------------------------
+------------------------------------------------------------------------
 
 # Hacemos que si un partido tienen asiganda varias abreviaturas se quede con la primera y UNimos elecciones con abreaviaturas, para que en elecciones salga la abrevaitura de cada partido
+
 ```{r}
 siglas_unique <- abbrev_g |> 
   distinct(denominacion, .keep_all = TRUE)
@@ -96,6 +95,7 @@ cod_mun <- cod_mun |>
 ```
 
 ## En la tabla surveys (encuestas) hacemos una columna partido, muy simliar al primero de elecciones, además quitamos los partidos que no tienen importancia en la encuesta, es decir que no han recibido datos
+
 ```{r}
 
 
@@ -129,8 +129,8 @@ surveys_clean <- surveys_clean |>
 
 ```
 
-
 ## 12
+
 # a) ¿Qué partido fue el ganador en los municipios con más de 100.000 habitantes (censo) en cada una de las elecciones?
 
 ```{r}
@@ -146,9 +146,8 @@ resultados_grandes_municipios <- election_tidy_with_siglas |>
   ungroup()  
 ```
 
--------------------------------------------------------------------------------
-# b) ¿Qué partido fue el segundo cuando el primero fue el PSOE? ¿Y cuando el primero fue el PP?
-`
+------------------------------------------------------------------------
+
 ```{r}
 # Obtener los dos primeros partidos por año
 resultados_top2 <- election_tidy_with_siglas |> 
@@ -191,11 +190,10 @@ crecimiento_partido <- function(election_tidy) {
   return(crecimiento)
 }
 
-
 ```
 
-------------------------------------------------------------------------------
 # c) ¿A quién beneficia la baja participación?
+
 ```{r}
 
 election_tidy_with_participation <- election_tidy_with_siglas |> 
@@ -297,7 +295,6 @@ error_calibration <- votes_percentage |>
   mutate(error = abs(percentage_votes - percentage_intention))
 ```
 
-
 ## ¿Qué casas encuestadoras acertaron más y cuáles se desviaron más de los resultados?
 
 ```{r}
@@ -329,8 +326,8 @@ medios_menos_acertados <- accuracy_by_media |> slice_max(order_by = mean_error, 
 
 ```
 
-##Ejercicios extra Mendoza
-#Relación entre el censo y el voto mediante un mapa:
+## Ejercicios extra Mendoza Relación entre el censo y el voto mediante un mapa:
+
 ```{r}
 
 indice <- election_data|>
@@ -428,8 +425,8 @@ ggplot(ganadores_mun)+
 
 ```
 
-
 ## Ejercicios extras Marcos
+
 # ¿Qué 10 partidos obtuvieron mejores resultados en comparación con las predicciones de las encuestas?
 
 ```{r}
@@ -450,6 +447,7 @@ comparativa_partidos <- surveys_clean_siglas |>
 ```
 
 # ¿Cuál es la relación entre el tamaño del censo y la fragmentación del voto (índice de Herfindahl)? Representar los valores de fragmentación en un mapa por comunidades autonomas.
+
 ```{r}
 library(mapSpain)
 library(ggplot2)
@@ -531,8 +529,11 @@ crecimiento_partido <- function(election_tidy) {
   return(crecimiento)
 }
 ```
+
 ## Ejercicios extra Rodrigo
+
 # ¿Qué comunidad autónoma tiene la mayor participación electoral promedio en las elecciones entre 2008 y 2019?
+
 ```{r}
 
 codigo_a_comunidad <- c(
@@ -598,9 +599,10 @@ participacion_int
 
 ```
 
+------------------------------------------------------------------------
 
-------------------------------------------------------------------------------
 #¿Cuál es la relación entre la participación electoral y el tamaño de la muestra de las encuestas?
+
 ```{r}
 
 encuestas_filtradas <- surveys_clean_siglas |> 
