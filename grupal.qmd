@@ -700,3 +700,113 @@ crecimiento_partido <- function(election_tidy) {
   return(crecimiento)
 }
 ```
+
+
+```{r}
+# Ejercicios extra Rodrigo:
+
+# 1 ¿Qué comunidad autónoma tiene la mayor participación electoral promedio en las elecciones entre 2008 y 2019?
+
+
+codigo_a_comunidad <- c(
+  "14" = "País Vasco",
+  "07" = "Castilla La Mancha",
+  "17" = "Comunidad Valenciana",
+  "01" = "Andalucía",
+  "08" = "Castilla y León",
+  "10" = "Extremadura",
+  "04" = "Islas Baleares",
+  "09" = "Cataluña",
+  "11" = "Galicia",
+  "02" = "Aragón",
+  "16" = "La Rioja",
+  "12" = "Madrid",
+  "15" = "Murcia",
+  "13" = "Navarra",
+  "03" = "Asturias",
+  "05" = "Canarias",
+  "06" = "Cantabria",
+  "18" = "Ceuta",
+  "19" = "Melilla"
+)
+
+
+participacion_media_ccaa <- election_tidy_with_siglas |> 
+  group_by(codigo_ccaa) |> 
+  summarise(
+    participacion_promedio = mean(votos_candidaturas, na.rm = TRUE) / mean(censo, na.rm = TRUE) * 100
+  ) 
+
+
+participacion_media_ccaa <- participacion_media_ccaa |> 
+  mutate(nombre_ccaa = codigo_a_comunidad[as.character(codigo_ccaa)])
+
+
+ggplot(participacion_media_ccaa, aes(x = reorder(nombre_ccaa, -participacion_promedio), y = participacion_promedio, fill = nombre_ccaa)) +
+  geom_bar(stat = "identity", show.legend = FALSE, width = 0.8) +
+  geom_text(aes(label = round(participacion_promedio, 2)), 
+            vjust = -0.3,  
+            color = "black", size = 3, fontface = "bold") +
+  scale_fill_viridis_d(option = "D", begin = 0.2, end = 0.8) +  
+  scale_y_continuous(limits = c(0, 100)) + 
+  labs(
+    title = "Comunidad Autónoma con Mayor Participación Electoral Promedio (2008-2019)",
+    subtitle = "Participación promedio en las elecciones durante el período 2008-2019",
+    x = "Comunidad Autónoma",
+    y = "Participación Promedio (%)"
+  ) +
+  theme_minimal(base_size = 15) +
+  theme(
+    axis.text.x = element_text(angle = 45, hjust = 1, size = 13, family = "Arial", color = "darkblue"),
+    axis.text.y = element_text(size = 13, family = "Arial", color = "darkblue"),
+    axis.title.x = element_text(size = 14, face = "bold", family = "Arial", color = "darkred"),
+    axis.title.y = element_text(size = 14, face = "bold", family = "Arial", color = "darkred"),
+    plot.title = element_text(size = 11, face = "bold", family = "Arial", color = "darkgreen"),
+    plot.subtitle = element_text(size = 12, family = "Arial", color = "gray50"),
+    plot.margin = margin(10, 20, 10, 20),
+    panel.grid.major = element_line(color = "gray85", size = 0.5),
+    panel.grid.minor = element_blank(),
+    panel.background = element_rect(fill = "white", color = "white"))
+
+
+# 2 ¿Cuál es la relación entre la participación electoral y el tamaño de la muestra de las encuestas?
+encuestas_filtradas <- surveys_clean_siglas |> 
+  filter(size >= 500)
+
+participacion_por_partido <- encuestas_filtradas |> 
+  group_by(Partido) |> 
+  summarise(mean_participacion = mean(value, na.rm = TRUE))
+
+partidos_colores <- c(
+  "PSOE" = "#D50032",  
+  "PP" = "#0056A0",    
+  "C's" = "#FF6600",   
+  "VOX" = "#006747",   
+  "UP" = "#9B4F96",     
+  "ERC" = "#D82B6D",    
+  "PNV" = "#006A3E",    
+  "MP" = "#03A9F4",     
+  "EH-BILDU" = "#E32B5F",
+  "CIU" = "#A7C3A4",    
+  "BNG" = "#E60012",    
+  "Otros" = "#BDBDBD"    
+)
+
+ggplot(participacion_por_partido, aes(x = reorder(Partido, -mean_participacion), y = mean_participacion, fill = Partido)) +
+  geom_bar(stat = "identity", width = 0.7) +  
+  scale_fill_manual(values = partidos_colores) +  
+  labs(title = "Participación Electoral Promedio por Partido (Tamaño de Muestra > 500)",
+       x = "Partido", y = "Participación Electoral Promedio (%)") +
+  theme_minimal(base_size = 14) +  
+  theme(
+    axis.text.x = element_text(angle = 45, hjust = 1, size = 12),  
+    axis.text.y = element_text(size = 12),  
+    plot.title = element_text(size = 12, face = "bold", hjust = 0.5),  
+    legend.position = "none",  
+    panel.grid.major.x = element_blank(),  
+    panel.grid.minor.x = element_blank()   
+  ) +
+  coord_flip()
+```
+
+
