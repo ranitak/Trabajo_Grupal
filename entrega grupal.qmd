@@ -22,6 +22,7 @@ library(dplyr)
 library(ggplot2)
 library(plotly)
 library(patchwork)
+library(mapSpain)
 
 
 ```
@@ -295,7 +296,7 @@ error_calibration <- votes_percentage |>
   mutate(error = abs(percentage_votes - percentage_intention))
 ```
 
-## ¿Qué casas encuestadoras acertaron más y cuáles se desviaron más de los resultados?
+¿Qué casas encuestadoras acertaron más y cuáles se desviaron más de los resultados?
 
 ```{r}
 # Calcular el porcentaje de error por casa encuestadora
@@ -449,9 +450,6 @@ comparativa_partidos <- surveys_clean_siglas |>
 ¿Cuál es la relación entre el tamaño del censo y la fragmentación del voto (índice de Herfindahl)? Representar los valores de fragmentación en un mapa por comunidades autonomas.
 
 ```{r}
-library(mapSpain)
-library(ggplot2)
-library(dplyr)
 
 
 election_tidy_with_siglas <- election_tidy_with_siglas |> 
@@ -505,6 +503,8 @@ ggplot(mapa_fragmentacion_ccaa) +
   )
 ```
 
+Funcion para calcular la evolucion de votos de un partido
+
 ```{r}
 # Rodri
 crecimiento_partido <- function(election_tidy) {
@@ -530,7 +530,7 @@ crecimiento_partido <- function(election_tidy) {
 }
 ```
 
-## Ejercicios extra Rodrigo
+## Ejercicios extra 
 
 ¿Qué comunidad autónoma tiene la mayor participación electoral promedio en las elecciones entre 2008 y 2019?
 
