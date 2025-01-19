@@ -38,7 +38,7 @@ surveys <- read_csv(file = "./data/historical_surveys.csv")
 abbrev <- read_csv(file = "./data/siglas.csv")
 ```
 
-# Pasamos la tabla de elecciones a tidy, hacemos una columna partido
+Pasamos la tabla de elecciones a tidy, hacemos una columna partido
 
 ```{r}
 
@@ -48,7 +48,7 @@ election_tidy <- election_data |>
 
 ```
 
-# Agrupar varios partidos a la misma sigla
+Agrupar varios partidos a la misma sigla
 
 ```{r}
 abbrev_g<-abbrev |> 
@@ -69,7 +69,7 @@ abbrev_g<-abbrev |>
 
 ```
 
-# Hacemos que si un partido tienen asiganda varias abreviaturas se quede con la primera y UNimos elecciones con abreaviaturas, para que en elecciones salga la abrevaitura de cada partido
+Hacemos que si un partido tienen asiganda varias abreviaturas se quede con la primera y unimos elecciones con abreaviaturas, para que en elecciones salga la abrevaitura de cada partido
 
 ```{r}
 siglas_unique <- abbrev_g |> 
@@ -81,7 +81,7 @@ election_tidy_with_siglas <- election_tidy |>
 
 ```
 
-# Separamos cod_mun en las 3 varibales de comunidad autonoma, provincia y municipio, para que coincidan con las de la tabla elecciones
+Separamos cod_mun en las 3 varibales de comunidad autonoma, provincia y municipio, para que coincidan con las de la tabla elecciones
 
 ```{r}
 
@@ -91,7 +91,7 @@ cod_mun <- cod_mun |>
            sep = "-")
 ```
 
-# En la tabla surveys (encuestas) hacemos una columna partido, muy simliar al primero de elecciones, además quitamos los partidos que no tienen importancia en la encuesta, es decir que no han recibido datos
+En la tabla surveys (encuestas) hacemos una columna partido, muy simliar al primero de elecciones, además quitamos los partidos que no tienen importancia en la encuesta, es decir que no han recibido datos
 
 ```{r}
 
@@ -103,7 +103,7 @@ surveys_tidy <- surveys |>
 
 ```
 
-# Debes descartar las encuestas que: se refieran a elecciones anteriores a 2008, sean a pie de urna, tamaño muestral desconocido o inferior a 500, tenga 1 día o menos de trabajo de campo.
+Debes descartar las encuestas que: se refieran a elecciones anteriores a 2008, sean a pie de urna, tamaño muestral desconocido o inferior a 500, tenga 1 día o menos de trabajo de campo.
 
 ```{r}
 # Convertir las columnas de fecha a formato Date
@@ -126,7 +126,7 @@ surveys_clean <- surveys_clean |>
 
 ```
 
-# 12.a) ¿Qué partido fue el ganador en los municipios con más de 100.000 habitantes (censo) en cada una de las elecciones?
+12.a) ¿Qué partido fue el ganador en los municipios con más de 100.000 habitantes (censo) en cada una de las elecciones?
 
 ```{r}
 resultados_grandes_municipios <- election_tidy_with_siglas |> 
@@ -141,7 +141,7 @@ resultados_grandes_municipios <- election_tidy_with_siglas |>
   ungroup()  
 ```
 
-# 12.b) ¿Qué partido fue el segundo cuando el primero fue el PSOE? ¿Y cuando el primero fue el PP?
+12.b) ¿Qué partido fue el segundo cuando el primero fue el PSOE? ¿Y cuando el primero fue el PP?
 
 ```{r}
 # Obtener los dos primeros partidos por año
@@ -187,7 +187,7 @@ crecimiento_partido <- function(election_tidy) {
 
 ```
 
-# 12.c) ¿A quién beneficia la baja participación?
+12.c) ¿A quién beneficia la baja participación?
 
 ```{r}
 
@@ -250,78 +250,7 @@ resultados_interactivo
 
 ```
 
-# 12.d)¿Cómo calibrar el error de las encuestas (recordemos que las encuestas son de intención de voto a nivel nacional)?
-
-```{r}
-# Agrupar varios partidos a la misma sigla
-surveys_clean_siglas <- surveys_clean |> 
-  mutate(Partido=case_when(
-    str_detect(Partido, "PSOE") ~ "PSOE",
-    str_detect(Partido, "PP") ~ "PP",
-    str_detect(Partido, "C's") ~ "C's",
-    str_detect(Partido, "PNV") ~ "PNV",
-    str_detect(Partido, "BNGO") ~ "BNG",
-    str_detect(Partido, "CIU") ~ "CIU",
-    str_detect(Partido, "UP") ~ "UP",
-    str_detect(Partido, "ERC") ~ "ERC",
-    str_detect(Partido, "EH-BILDU") ~ "EH-BILDU",
-    str_detect(Partido, "MP") ~ "MP",
-    str_detect(Partido, "VOX") ~ "VOX",
-    TRUE ~ "OTROS",
-  ))
-# Calcular el porcentaje de votos por partido en las elecciones
-votes_percentage <- election_tidy_with_siglas |> 
-  group_by(anno, siglas) |> 
-  summarise(total_votes = sum(votos, na.rm = TRUE), .groups = "drop_last") |> 
-  mutate(percentage_votes = total_votes / sum(total_votes) * 100) |> 
-  ungroup()
-
-# Calcular el porcentaje de intención de voto por partido en las encuestas
-survey_percentage <- surveys_clean_siglas |> 
-  mutate(date_elec = year(date_elec)) |> 
-  group_by(date_elec, Partido) |> 
-  summarise(mean_intention = mean(value, na.rm = TRUE), .groups = "drop_last") |> 
-  mutate(percentage_intention = mean_intention / sum(mean_intention) * 100) |> 
-  ungroup()
-
-# Unir ambas tablas y calcular el error
-error_calibration <- votes_percentage |> 
-  inner_join(survey_percentage, by = c("anno" = "date_elec", "siglas" = "Partido")) |>
-  mutate(error = abs(percentage_votes - percentage_intention))
-```
-
-# ¿Qué casas encuestadoras acertaron más y cuáles se desviaron más de los resultados?
-
-```{r}
-# Calcular el porcentaje de error por casa encuestadora
-media_errors <- surveys_clean_siglas |> 
-  mutate(anno = year(date_elec)) |> 
-  group_by(anno, Partido, media) |> 
-  summarise(
-    mean_intention = mean(value, na.rm = TRUE),
-    .groups = "drop"
-  ) |> 
-  mutate(percentage_intention = mean_intention / sum(mean_intention) * 100) |> 
-  inner_join(votes_percentage, by = c("anno", "Partido" = "siglas")) |> 
-  mutate(error = abs(percentage_votes - percentage_intention))
-
-# Calcular el error promedio por casa encuestadora
-accuracy_by_media <- media_errors |> 
-  group_by(media) |> 
-  summarise(
-    mean_error = mean(error, na.rm = TRUE),
-    .groups = "drop"
-  ) |> 
-  arrange(mean_error)
-
-# Identificar las casas encuestadoras más acertadas y más desviadas
-medios_mas_acertados <- accuracy_by_media |> slice_min(order_by = mean_error, n = 5)
-medios_menos_acertados <- accuracy_by_media |> slice_max(order_by = mean_error, n = 5)
-
-
-```
-
-# 12.d) Relación entre el censo y el voto mediante un mapa:
+12.d) Relación entre el censo y el voto mediante un mapa:
 
 ```{r}
 
@@ -420,9 +349,80 @@ ggplot(ganadores_mun)+
 
 ```
 
+¿Cómo calibrar el error de las encuestas (recordemos que las encuestas son de intención de voto a nivel nacional)?
+
+```{r}
+# Agrupar varios partidos a la misma sigla
+surveys_clean_siglas <- surveys_clean |> 
+  mutate(Partido=case_when(
+    str_detect(Partido, "PSOE") ~ "PSOE",
+    str_detect(Partido, "PP") ~ "PP",
+    str_detect(Partido, "C's") ~ "C's",
+    str_detect(Partido, "PNV") ~ "PNV",
+    str_detect(Partido, "BNGO") ~ "BNG",
+    str_detect(Partido, "CIU") ~ "CIU",
+    str_detect(Partido, "UP") ~ "UP",
+    str_detect(Partido, "ERC") ~ "ERC",
+    str_detect(Partido, "EH-BILDU") ~ "EH-BILDU",
+    str_detect(Partido, "MP") ~ "MP",
+    str_detect(Partido, "VOX") ~ "VOX",
+    TRUE ~ "OTROS",
+  ))
+# Calcular el porcentaje de votos por partido en las elecciones
+votes_percentage <- election_tidy_with_siglas |> 
+  group_by(anno, siglas) |> 
+  summarise(total_votes = sum(votos, na.rm = TRUE), .groups = "drop_last") |> 
+  mutate(percentage_votes = total_votes / sum(total_votes) * 100) |> 
+  ungroup()
+
+# Calcular el porcentaje de intención de voto por partido en las encuestas
+survey_percentage <- surveys_clean_siglas |> 
+  mutate(date_elec = year(date_elec)) |> 
+  group_by(date_elec, Partido) |> 
+  summarise(mean_intention = mean(value, na.rm = TRUE), .groups = "drop_last") |> 
+  mutate(percentage_intention = mean_intention / sum(mean_intention) * 100) |> 
+  ungroup()
+
+# Unir ambas tablas y calcular el error
+error_calibration <- votes_percentage |> 
+  inner_join(survey_percentage, by = c("anno" = "date_elec", "siglas" = "Partido")) |>
+  mutate(error = abs(percentage_votes - percentage_intention))
+```
+
+¿Qué casas encuestadoras acertaron más y cuáles se desviaron más de los resultados?
+
+```{r}
+# Calcular el porcentaje de error por casa encuestadora
+media_errors <- surveys_clean_siglas |> 
+  mutate(anno = year(date_elec)) |> 
+  group_by(anno, Partido, media) |> 
+  summarise(
+    mean_intention = mean(value, na.rm = TRUE),
+    .groups = "drop"
+  ) |> 
+  mutate(percentage_intention = mean_intention / sum(mean_intention) * 100) |> 
+  inner_join(votes_percentage, by = c("anno", "Partido" = "siglas")) |> 
+  mutate(error = abs(percentage_votes - percentage_intention))
+
+# Calcular el error promedio por casa encuestadora
+accuracy_by_media <- media_errors |> 
+  group_by(media) |> 
+  summarise(
+    mean_error = mean(error, na.rm = TRUE),
+    .groups = "drop"
+  ) |> 
+  arrange(mean_error)
+
+# Identificar las casas encuestadoras más acertadas y más desviadas
+medios_mas_acertados <- accuracy_by_media |> slice_min(order_by = mean_error, n = 5)
+medios_menos_acertados <- accuracy_by_media |> slice_max(order_by = mean_error, n = 5)
+
+
+```
+
 # Ejercicios extras
 
-# ¿Qué 10 partidos obtuvieron mejores resultados en comparación con las predicciones de las encuestas?
+¿Qué 10 partidos obtuvieron mejores resultados en comparación con las predicciones de las encuestas?
 
 ```{r}
 
@@ -441,7 +441,7 @@ comparativa_partidos <- surveys_clean_siglas |>
   slice_max(order_by = diferencia, n = 10)
 ```
 
-# ¿Cuál es la relación entre el tamaño del censo y la fragmentación del voto (índice de Herfindahl)? Representar los valores de fragmentación en un mapa por comunidades autonomas.
+¿Cuál es la relación entre el tamaño del censo y la fragmentación del voto (índice de Herfindahl)? Representar los valores de fragmentación en un mapa por comunidades autonomas.
 
 ```{r}
 
@@ -497,7 +497,7 @@ ggplot(mapa_fragmentacion_ccaa) +
   )
 ```
 
-# Funcion para calcular la evolucion de votos de un partido
+Funcion para calcular la evolucion de votos de un partido
 
 ```{r}
 crecimiento_partido <- function(election_tidy) {
@@ -523,7 +523,7 @@ crecimiento_partido <- function(election_tidy) {
 }
 ```
 
-# ¿Qué comunidad autónoma tiene la mayor participación electoral promedio en las elecciones entre 2008 y 2019?
+¿Qué comunidad autónoma tiene la mayor participación electoral promedio en las elecciones entre 2008 y 2019?
 
 ```{r}
 
@@ -590,7 +590,7 @@ participacion_int
 
 ```
 
-# ¿Cuál es la relación entre la participación electoral y el tamaño de la muestra de las encuestas?
+¿Cuál es la relación entre la participación electoral y el tamaño de la muestra de las encuestas?
 
 ```{r}
 
@@ -636,9 +636,9 @@ encuestas_int <- ggplotly(encuestas)
 encuestas_int
 ```
 
-##Ejercicios extra Álvaro
+Ejercicios extra Álvaro
 
-##Pregunta 1: ¿Cómo han cambiado las categorías de votos (mayoría, empate, minoría) por provincia desde 2008 hasta 2019?
+Pregunta 1: ¿Cómo han cambiado las categorías de votos (mayoría, empate, minoría) por provincia desde 2008 hasta 2019?
 
 ```{r}
 
@@ -668,4 +668,32 @@ ggplot(datos_comparacion, aes(x = fct_reorder(codigo_provincia, -porcentaje_voto
   theme_minimal() +
   theme(axis.text.x = element_text(angle = 90, hjust = 1),
         legend.position = "none")
+```
+
+Pregunta extra Mendoza: Posible dependencia
+
+```{r}
+
+ggplot(election_data, aes(x = sqrt(censo), y = sqrt(votos_blancos))) +
+  geom_point(alpha = 0.6, color = "blue") + # Puntos de dispersión
+  geom_smooth(method = "lm", color = "red", se = TRUE) + # Línea de tendencia (opcional)
+  scale_x_continuous(labels = scales::comma) + # Formato del eje x
+  scale_y_continuous(labels = scales::comma) + # Formato del eje y
+  labs(
+    title = "RELACION ENTRE CENSO Y VOTOS BLANCOS",
+    x = "CENSO",
+    y = "VOTOS BLANCOS"
+  ) +
+  theme_minimal() +
+  theme(
+    plot.title = element_text(hjust = 0.5, face = "bold", size = 14), # Estilo del título
+    axis.title = element_text(face = "bold", size = 12), # Estilo de los ejes
+    axis.text = element_text(size = 10) # Tamaño del texto en los ejes
+  )
+# Calculamos la correlacion
+
+correlacion_1 <- cor(election_data$censo, election_data$votos_blancos, method = "pearson", use = "complete.obs")
+print(paste("Coeficiente de correlación de Pearson:", round(correlacion_1, 2)))
+
+
 ```
